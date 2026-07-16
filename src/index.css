@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 38% 6%; /* #0a0d14 */
+    --foreground: 210 40% 98%;
+    
+    --card: 222 33% 10%; /* #111622 */
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222 33% 10%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 217 91% 60%; /* #3b82f6 */
+    --primary-foreground: 222 47% 11%;
+    
+    --secondary: 222 29% 16%; /* #1c2333 */
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 222 29% 16%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 217 91% 60%;
+    --accent-foreground: 210 40% 98%;
+    
+    --destructive: 0 74% 42%; /* #b91c1c */
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 222 29% 16%; /* #1c2333 */
+    --input: 222 29% 16%;
+    --ring: 242 47% 34%; /* #312e81 */
+    
+    --radius: 0.25rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Outfit', sans-serif;
+  }
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom scrollbars for high density metrics dashboard */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0d14;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1c2333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #312e81;
+}
