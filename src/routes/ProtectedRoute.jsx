@@ -2,11 +2,7 @@ import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
 
-interface ProtectedRouteProps {
-  children?: React.ReactNode;
-}
-
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+export const ProtectedRoute = ({ children }) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
   const isDevMode = import.meta.env.VITE_DEV_MODE === 'TRUE'
 

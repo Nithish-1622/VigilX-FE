@@ -1,84 +1,12 @@
-# VigilX Crime Intelligence Platform - Frontend Architecture Specification
+# VigilX Crime Intelligence Platform - Frontend Architecture & API Integration Specification
 
-This document serves as the official frontend specification for the VigilX Crime Intelligence Platform. It outlines the architectural design, folder structure, technology choices, API integration contracts, and UI/UX design language required to build a world-class, enterprise-grade command center interface.
-
----
-
-## 1. Frontend Vision
-
-The VigilX frontend is designed as a mission-critical **Crime Intelligence and Security Command Center Dashboard** rather than a consumer web application. Its target audience consists of law enforcement officers, crime analysts, supervisors, and federal investigators. 
-
-To meet the high standards of professional intelligence and cyber-security tools, the visual layout, density of information, and styling will resemble:
-*   **Palantir Gotham / Foundry** (Relational intelligence, object graphs, link analysis grids)
-*   **IBM i2 Analyst Notebook** (Crime timeline, case networks, entity relationships)
-*   **Microsoft Defender Security Center / Splunk Enterprise Security** (High-density security metrics, alert feeds, audit logs)
-*   **CrowdStrike Falcon / Azure Sentinel** (Sleek dark command widgets, geographic heatmaps, critical incident notifications)
-
-### What VigilX Is NOT:
-*   **NOT a general chatbot interface** (like ChatGPT, Claude, or Gemini)
-*   **NOT a consumer chat application** (like Discord, Slack, or WhatsApp)
-*   **NOT a fancy consumer dashboard** (no neon cyberpunk gradients, no glowing neon text, no gaming aesthetics, no portfolio website styles)
-
-Every page, widget, border, and interaction must convey absolute professionalism, military-grade security, readability under operational pressure, and high-performance data density.
+This document serves as the official, self-contained specification for the VigilX Crime Intelligence Platform frontend. It outlines the architectural design, folder structure, technology stack, design system, **explicit backend API integration contracts**, JSON payload schemas, Zustand stores, and TanStack Query data fetching patterns required to build and connect a mission-critical command center interface.
 
 ---
 
-## 2. Technology Stack
+## 1. System Vision & Architecture Overview
 
-The application will be built using the following modern React SPA stack:
-
-| Category | Technology Chosen | Purpose |
-|---|---|---|
-| **Core Framework** | React 18+ (with TypeScript) | Component-based, typed UI development |
-| **Build Tool** | Vite | Ultra-fast local dev compiling and production bundling |
-| **Routing** | React Router Dom v6 | Client-side routing, protected routes, and lazy loading |
-| **State Management** | Zustand | Light-weight, high-performance, boilerplate-free global state |
-| **Async Data / Caching** | TanStack Query v5 (React Query) | Query caching, synchronization, optimistic updates, and loading state management |
-| **HTTP Client** | Axios | Request/response interceptors (automatic JWT insertion and refresh) |
-| **Styling** | TailwindCSS v3 | Utility-first CSS framework for responsive utility layouts |
-| **UI Components** | ShadCN UI (Radix UI primitives) | Accessible, unstyled primitives styled with Tailwind (enterprise tables, dialogs, drawers) |
-| **Form Handling** | React Hook Form | High-performance, lightweight form validation and state |
-| **Schema Validation** | Zod | Runtime schema validation matching form states and API contracts |
-| **Animations** | Framer Motion | Fluid micro-animations (page transitions, sidebar collapses, drawer slides) |
-| **Icons** | Lucide React | Clean, minimalist, and standardized vector icons |
-| **Data Visualization** | Recharts | Responsive SVG charts for crime trends, timelines, and alert distributions |
-| **Date Utilities** | Day.js | Lightweight alternative to Moment.js for ISO-8601 formatting and duration calculations |
-| **Notifications** | React Hot Toast | Clean, non-intrusive toast notifications for alerts and system updates |
-
----
-
-## 3. Folder Structure
-
-The directory structure is organized using a **feature-based architecture** combined with shared layout, store, and theme modules. This guarantees enterprise-scale maintainability and horizontal scalability.
-
-```text
-src/
-├── assets/                 # Static images, SVG files, police logos
-├── components/             # Reusable UI components (buttons, badges, inputs, alerts)
-│   ├── ui/                 # ShadCN UI components (imported/customized primitives)
-│   └── feedback/           # Loaders, empty states, error boundaries
-├── features/               # Domain-specific modules encapsulating logic, components, and types
-│   ├── auth/               # Login page, auth forms, useAuth query hooks
-│   ├── cases/              # Case lists, grids, creation forms, timeline modules
-│   ├── victims/            # Victim tables, details, victim statements
-│   ├── accused/            # Accused/suspect records, search grids, criminal history
-│   ├── analytics/          # Crime trends, Recharts analytics, spatial heatmap containers
-│   ├── ai/                 # Conversational AI layout, session sidebar, streaming window, evidence cards
-│   └── audit/              # Audit log data grids, filter criteria
-├── layouts/                # Shared layout components (DashboardLayout, AuthLayout, Sidebar)
-├── hooks/                  # Global hooks (useDebounce, useLocalStorage, useKeyPress)
-├── services/               # Shared logic services (date formatting, calculation utils)
-├── api/                    # Axios clients, interceptors, API capability route registry
-├── store/                  # Zustand stores (useAuthStore, useSessionStore)
-├── routes/                 # ProtectedRoute wrapper, Routes configuration object
-├── types/                  # Shared TypeScript models and API contracts
-├── constants/              # System constants (routing paths, role options, lookup tables)
-└── theme/                  # Tailwind theme overrides and CSS design system variables
-```
-
----
-
-## 4. Application Architecture
+The VigilX frontend is designed as a mission-critical **Crime Intelligence and Security Command Center Dashboard** for law enforcement officers, analysts, and investigators.
 
 ```mermaid
 graph TD
@@ -86,260 +14,554 @@ graph TD
     Routes --> Protected[Protected Route Guard]
     Protected --> Layout[Dashboard Layout / Navigation]
     
-    Layout --> Zustand[Zustand Global State: Auth, Active Session]
-    Layout --> TanStack[TanStack Query: Data Caching]
+    Layout --> Zustand[Zustand Stores: Auth, Session, Dev Mode]
+    Layout --> TanStack[TanStack Query v5: Data Caching & Auto-Refetch]
     
-    TanStack --> Axios[Axios HTTP Client + Interceptors]
-    Axios --> Django[Django REST API: Port 8000]
-    Axios --> FastAPI[FastAPI AI Engine: Port 8001]
+    TanStack --> Axios[Axios Clients + JWT Interceptors]
+    Axios -->|Port 8000| Django[Django REST API: Cases, Accused, Victims, Auth]
+    Axios -->|Port 8001| FastAPI[FastAPI AI Engine: Multi-Agent Reasoning, Citations]
 ```
 
-### A. SPA Client-Side Routing
-Client-side routing is handled via `react-router-dom` in hash or path mode. Lazy loading (`React.lazy`) is used to split bundles by page route, ensuring fast initial page loads.
+### Backend Microservices & Ports
 
-### B. Route Guard & Protected Routes
-Access to intelligence pages is protected by an authorization guard (`ProtectedRoute.tsx`). If the Zustand store has no valid `accessToken`, the route guard automatically intercepts and redirects the client to `/login`.
-
-### C. JWT Authentication & Token Refresh Flow
-The authentication sequence handles access token expiration gracefully using an Axios response interceptor:
-1. **Request Interceptor**: Automatically appends `Authorization: Bearer <accessToken>` to every outgoing Axios call.
-2. **Response Interceptor (Token Refresh)**:
-   * If an API returns `HTTP 401 Unauthorized` (indicating the short-lived access token expired), the interceptor locks outgoing requests.
-   * It makes a background request to Django's `/api/auth/refresh/` using the stored `refreshToken`.
-   * On success, it updates Zustand storage with the new `accessToken`, retries the failed original request, and resolves the lock.
-   * On failure (refresh token also expired), it logs the user out, clears Zustand storage, and redirects to `/login`.
-
-### D. Global State & API Caching
-* Zustand handles **transient visual states** (sidebar collapse, active chatbot session ID, current authenticated officer credentials).
-* TanStack Query handles **server state caching**. It prevents redundant fetches to endpoints (like accused databases or case lists) and manages invalidation (`queryClient.invalidateQueries`) after new case registrations or log updates.
-
----
-
-## 5. Design Language & Design System
-
-The system UI reflects professional governance, security operations, and analytical efficiency. 
-
-### A. Color Palette
-VigilX uses a dark, low-contrast, muted color system to prevent eye strain during long investigator shifts.
-
-| Color Token | Hex Code | Visual Application |
+| Service | Protocol / Base URL | Role / Purpose |
 |---|---|---|
-| **Background Main** | `#0a0d14` | Body canvas background |
-| **Card Background** | `#111622` | Dashboard panels, forms, grid containers |
-| **Border Muted** | `#1c2333` | Panel separations, card borders |
-| **Border Active** | `#312e81` | Focused states, input select borders |
-| **Accent Primary** | `#3b82f6` | Professional Blue: Selection states, primary badges |
-| **Accent Success** | `#059669` | Muted Emerald: Solved status, active officers |
-| **Accent Warning** | `#d97706` | Muted Amber: Under investigation status |
-| **Accent Danger** | `#b91c1c` | Dark Crimson: Pending cases, urgent system alerts |
-
-### B. Typography
-* **Primary Font**: `Outfit` or `Inter` (Sans-Serif, loaded from Google Fonts).
-* **Weights**: Light (300), Regular (400), Medium (500), SemiBold (600), Bold (700).
-* Monospace font styles are used for rendering reference IDs, coordinates, and raw JSON logs.
-
-### C. Visual Rules
-* **Borders**: Muted, solid borders (`1px solid #1c2333`) are preferred over drop shadows to maintain a clean grid structure.
-* **Animations**: Fast, standard easing transitions (`150ms ease-in-out`) are used for collapsible components and drawer slide-ins. 
-* **Glow effects**: Glowing borders or subtle glass overlays are only permitted on the **Conversational AI** layout to set it apart from standard grid forms.
+| **Django REST API** | `http://127.0.0.1:8000` | Gateway, JWT Auth, PostgreSQL/SQLite DB (Cases, Accused, Victims, Investigation Logs) |
+| **FastAPI AI Engine** | `http://127.0.0.1:8001` | Agentic Orchestrator, Multi-turn RAG memory, Groq Cloud LLM (Llama-3.3-70b), Citation parsing |
 
 ---
 
-## 6. Page Specifications
+## 2. Technology Stack & Dependencies
 
-The platform is constructed of the following 17 page templates:
-
-1.  **Login (`/login`)**: High-security gateway containing credential inputs, password visibilities, and detailed verification indicators.
-2.  **Dashboard (`/`)**: Main hub providing high-level crime telemetry, alert tickers, trend panels, heatmap containers, and quick navigation grids.
-3.  **Case Management (`/cases`)**: Relational list of all investigative cases. Supports multi-column sorting, advanced filter categories, and status management.
-4.  **FIR Management (`/firs`)**: Dedicated portal for recording First Information Reports, dispatch times, officer assignments, and generating official prints.
-5.  **Victims Portal (`/victims`)**: Grid directory listing victim profiles, ages, addresses, contact details, and their official statements linked to specific cases.
-6.  **Accused/Suspects (`/accused`)**: High-security list of suspects, aliases, addresses, aliases, status markers (`SUSPECT`, `ACCUSED`, `ARRESTED`), and prior criminal histories.
-7.  **Officers Registry (`/officers`)**: Public/internal registry of police personnel, designations (`Inspector`, `SHO`), assigned cases count, badge numbers, and status.
-8.  **Evidence Locker (`/evidence`)**: Directory tracking physical clues, digital logs, documents, hash checks (SHA-256 for chain of custody), and storage locations.
-9.  **Crime Analytics (`/analytics`)**: Core analysis screen mapping Recharts visualizations of crime distributions, solved case ratios, and monthly/weekly trends.
-10. **Crime Timeline (`/timeline`)**: Gantt-style or linear timeline detailing incident timestamps, reported events, log changes, and event reference sources.
-11. **Geo Intelligence (`/geo`)**: Interactive geospatial map grid utilizing Leaflet/Mapbox placeholder layers for plotting coordinates, crime density markers, and police beats.
-12. **Report Generator (`/reports`)**: Action hub for generating PDF summaries, audit case files, export logs, and dispatching digital copies to command.
-13. **Alert Center (`/alerts`)**: Notification grid displaying real-time system alerts (e.g. status changes, new evidence additions, unauthorized login attempts).
-14. **AI Intelligence Hub (`/ai`)**: **Dedicated page** housing the multi-turn conversational interface and citation logs.
-15. **System Settings (`/settings`)**: Config page for API registry mappings, LLM temperature settings, default timeout criteria, and theme adjustments.
-16. **User Profile (`/profile`)**: Personalized section displaying active officer photo, badge ID, department, active session states, and credentials updating forms.
-17. **Audit Logs (`/audit`)**: Security logs tracking user activity, pages accessed, timestamps, API actions, and IP addresses for platform audits.
+| Category | Technology | Purpose & Package |
+|---|---|---|
+| **Core Framework** | React 18+ / React 19 | Component-based SPA framework (JS/JSX or TS/TSX) |
+| **Build Tool** | Vite | Compiler and development server |
+| **Routing** | React Router Dom v6 / v7 | Client-side routing (`HashRouter` or `BrowserRouter`) |
+| **State Management** | Zustand (`zustand`) | Lightweight global state (auth, sidebar, active chat session) |
+| **Async Data Caching**| TanStack Query v5 (`@tanstack/react-query`) | Query caching, synchronization, auto-refetching |
+| **HTTP Client** | Axios (`axios`) | Request/response interceptors (Bearer injection & token refresh) |
+| **Styling** | TailwindCSS v3 | Utility-first CSS framework with dark theme variables |
+| **UI Utilities** | `clsx` + `tailwind-merge` | Conditional class name resolution (`cn()` helper) |
+| **Icons** | Lucide React (`lucide-react`) | Standardized vector icons |
+| **Data Visualization**| Recharts (`recharts`) | Interactive Area, Bar, and Pie charts for crime analytics |
+| **Date Formatting** | Day.js (`dayjs`) | ISO-8601 formatting and duration calculations |
+| **Notifications** | React Hot Toast (`react-hot-toast`) | Security alert banners and feedback toasts |
 
 ---
 
-## 7. Premium Dashboard Design
+## 3. Environment Configuration & Developer Mode
 
-The dashboard (`/`) represents the high-density analytical center of VigilX, structured on a multi-column responsive grid layout:
+Create a `.env` file at the root of the frontend workspace directory:
 
-```text
-+-----------------------------------------------------------------------------+
-|  [Header] National Intelligence Command             Officer: Ramesh (B-101) |
-+-----------------------------------------------------------------------------+
-|  [Stats Row: Total Cases (12) | Under Investigation (8) | Solved Cases (4)] |
-+-----------------------------------------------------------------------------+
-|  [Left: Crime Trends Chart]             | [Right: Real-time Alert Ticker]   |
-|  (Interactive Area/Bar chart showing    | - Unassigned case reported (Urgent) |
-|  crime categories by month)              | - Suspect John Doe added to FIR-123|
-+-----------------------------------------------------------------------------+
-|  [Left: Recent FIR Case Records Grid]   | [Right: Recent AI Insights Feed]  |
-|  - FIR-123 | Theft | Koramangala        | "Accused John Doe shares a phone  |
-|  - FIR-124 | Assault | Indiranagar      | number linked to unresolved cases"|
-+-----------------------------------------------------------------------------+
+```env
+# API Base Endpoints
+VITE_DJANGO_BASE_URL=http://127.0.0.1:8000
+VITE_FASTAPI_BASE_URL=http://127.0.0.1:8001
+
+# Developer Mode Flag: Set to TRUE to bypass login authentication during frontend development
+VITE_DEV_MODE=TRUE
 ```
 
-### Key Interactive Components:
-1. **Quick Action Grid**: Quick navigation button tags to record a new case, dispatch an alert, search a suspect, or open a live timeline.
-2. **Case Distribution Doughnut Chart**: Interactive chart mapping proportion of crime types (Thefts vs Cybercrime vs Assaults).
-3. **Heatmap Placeholder Panel**: Canvas mapping mock grids with cluster overlays representing crime concentrations.
-4. **Officer Activity Queue**: List detailing the active tasks of assigned investigators.
+### Developer Mode Bypass Protocol
+When `VITE_DEV_MODE=TRUE` is set:
+1. `ProtectedRoute` automatically permits navigation to `/`, `/cases`, `/accused`, `/victims`, `/ai`, `/analytics`, and `/audit` without redirecting to `/login`.
+2. `LoginPage` automatically initializes a mock developer session (`dev_officer`, Badge: `DEV-007`) and navigates directly to `/`.
+3. `Navbar` renders fallback officer credentials if no active session is saved in `localStorage`.
 
 ---
 
-## 8. Dedicated Conversational AI Portal (`/ai`)
+## 4. Complete Backend API Contracts & Payload Schemas
 
-Unlike common chatbot elements embedded in margins, the Conversational AI has a **dedicated full-page interface** located at `/ai`. This portal acts as an advanced SPA interface that doesn't trigger page reloads.
+### A. Authentication & Token Refresh (Django - Port 8000)
 
-```text
-+-----------------------------------------------------------------------------+
-|  [Sidebar: Conversations]    |  [Main Chat Screen]                          |
-|                              |  VigilX AI Assistant                         |
-|  [+ New Conversation]        |  ==========================================  |
-|                              |  Q: Where does he live?                      |
-|  Active Session:             |  A: No. 5, 2nd Cross, Koramangala.           |
-|  - Case summary John Doe     |  [Source 1: ACC_2001] [Source 2: CASE_1001]   |
-|                              |  ------------------------------------------  |
-|  Past Sessions:              |  [Evidence Timeline]                         |
-|  - Burglary evidence         |  - john_doe (Accused): Koramangala           |
-|  - Cyber fraud suspects      |  - fir_123 (Incident): Koramangala Block 4   |
-|                              |  ==========================================  |
-|  [Search Sessions...]        |  [Suggested Followups:                       |
-|                              |   - What is John Doe's criminal history?]    |
-+------------------------------+----------------------------------------------+
-|                              |  [Text Input Area]                     [➔]   |
-+-----------------------------------------------------------------------------+
+#### 1. Login Endpoint
+* **Endpoint**: `POST http://127.0.0.1:8000/api/auth/login/`
+* **Auth Required**: No
+* **Request Body**:
+```json
+{
+  "username": "officer1",
+  "password": "Officer123!"
+}
+```
+* **Success Response (`200 OK`)**:
+```json
+{
+  "refresh": "eyJhbGciOiJIUzI1NiIsIn...",
+  "access": "eyJhbGciOiJIUzI1NiIsIn..."
+}
 ```
 
-### Layout Elements & State Management:
-*   **Conversational History & Sidebar**: Zustand manages session items. Users can search previous chats, rename, pin, delete, or clear conversation chains dynamically.
-*   **Markdown & Code Blocks**: Response bubbles format standard Markdown text and code blocks cleanly (using `react-markdown` and syntax highlighters).
-*   **Evidence Cards & Citation Badges**:
-    *   Citations returned from the API render as interactive badges.
-    *   Clicking a badge opens an **Evidence Card** as an inline drawer or popup, parsing raw key-value snippets (such as age, gender, address, and status) into a high-density, structured profile view.
-*   **Confidence & Reasoning Indicator**: Displays status bars showing the AI's confidence levels (`low`, `medium`, `high`) and a collapsed accordion detailing RAG/SQL reasoning routes.
-*   **Suggested Follow-up Questions**: Dynamically render buttons representing query routes computed by the AI (e.g. `"List all evidence associated with this suspect"`).
-*   **Export Actions**: Dedicated buttons to export conversational sessions into official PDF or text files.
+#### 2. Token Refresh Endpoint
+* **Endpoint**: `POST http://127.0.0.1:8000/api/auth/refresh/`
+* **Auth Required**: No
+* **Request Body**:
+```json
+{
+  "refresh": "<refresh_token_string>"
+}
+```
+* **Success Response (`200 OK`)**:
+```json
+{
+  "access": "<new_access_token_string>"
+}
+```
 
 ---
 
-## 9. Reusable Component Registry
+### B. FIR Case Records API (Django - Port 8000)
 
-Standardized React components styled with TailwindCSS:
+#### 1. List Cases
+* **Endpoint**: `GET http://127.0.0.1:8000/api/cases/`
+* **Query Parameters**: `?search=FIR-123` (optional keyword search for FIR number or description)
+* **Auth Required**: Yes (`Authorization: Bearer <access_token>`)
+* **Success Response (`200 OK`)**:
+```json
+{
+  "count": 12,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "b20363f3-6346-4c04-a358-9dfa2614f68b",
+      "fir_number": "FIR-123",
+      "crime_type": "THEFT",
+      "incident_date_time": "2026-07-14T10:00:00Z",
+      "reported_date_time": "2026-07-14T11:30:00Z",
+      "location": "Koramangala, Bengaluru",
+      "latitude": 12.9352,
+      "longitude": 77.6245,
+      "status": "PENDING",
+      "description": "Larceny reported at electronic retail store."
+    }
+  ]
+}
+```
 
-1.  **Navbar**: Shared top header displaying current location, global search, alerts count, and profile dropdowns.
-2.  **Sidebar**: Collapsible, responsive navigation tree linking all major pages.
-3.  **Breadcrumb**: Path navigator showing current page hierarchy (`Cases > Details > Evidence`).
-4.  **Header**: Section headers separating visual actions.
-5.  **Card**: Container card wrapper utilizing a subtle glass effect and border highlight.
-6.  **Table / DataGrid**: Responsive grid component with pagination controls, sorting tags, and row click callbacks.
-7.  **Search**: Search bar component with a debounced input handler.
-8.  **Filters**: Sliding panel containing checkable filters (dates, categories, status).
-9.  **Dialog (Modal)**: Accessible modal popup overlay for creating records or viewing detail cards.
-10. **Drawer**: Slide-out panel for checking inline records, citations, or notifications.
-11. **Toast**: Muted toast feedback boxes.
-12. **Loader / Skeleton**: High-density skeleton outlines showing custom loaders while fetching data.
-13. **Charts**: Responsive wraps around Recharts elements (Area, Line, Bar, Pie).
-14. **Chat Bubble**: Layout differentiating User message styles from Assistant bubbles.
-15. **Evidence Card**: Structured detail cards displaying names, fields, status, and raw values.
-16. **Timeline**: Linear event tracker showing incident points.
-17. **Badge**: Small status indicators (`PENDING`, `ARRESTED`).
-18. **Avatar**: Profile photo or badge symbol wrapper.
-19. **Notification**: Notification bell dropdown.
-
----
-
-## 10. Responsive Behaviour & Collapsible Sidebars
-
-*   **Desktop First**: The platform is optimized for desktop layouts (police desk command centers, double monitor configurations).
-*   **Tablet/Responsive Layouts**:
-    *   The main navigation sidebar collapses into a thin icon-only track or hides completely behind a hamburger button.
-    *   Dashboard layouts transition from a 2-column format (`dashboard-grid`) to single-column blocks.
-    *   Data tables automatically support horizontal scroll or hide non-essential columns.
-*   **Mobile Support**: AI chatbots and search fields scale to 100% viewport width, and secondary details open as bottom drawers instead of popups.
-
----
-
-## 11. API Integration Specifications
-
-Frontend queries map to backend services using standard Axios headers and paths.
-
-### A. Endpoint Mappings
-
-| Service / Action | Target Port | Path | Method | Auth Required |
-|---|---|---|---|---|
-| JWT Token Login | `8000` | `/api/auth/login/` | `POST` | No |
-| JWT Token Refresh | `8000` | `/api/auth/refresh/` | `POST` | No |
-| List Case Records | `8000` | `/api/cases/` | `GET` | Yes |
-| Create Case Record | `8000` | `/api/cases/` | `POST` | Yes |
-| List Accused Persons | `8000` | `/api/accused/` | `GET` | Yes |
-| List Victims Profiles | `8000` | `/api/victims/` | `GET` | Yes |
-| Create Investigation Log | `8000` | `/api/investigations/` | `POST` | Yes |
-| Conversational AI Ask | `8001` | `/ai/ask` | `POST` | Yes |
-| FastAPI System Health | `8001` | `/health` | `GET` | No |
-
-### B. Error Handling & Retry Logic
-*   **Django Gateway Timeouts**: Configure Axios timeouts at `10000ms`.
-*   **TanStack Query Retries**:
-    *   Read-only requests (`GET`) retry up to **2 times** with exponential backoff if a connection error occurs.
-    *   Write requests (`POST`, `PUT`) never retry automatically to prevent duplicate record creations.
-*   **Global Error Handling**: Unhandled API failures display a clean banner (`"Service Unavailable"`) and toast alerts with detailed code contexts.
+#### 2. Create Case Record
+* **Endpoint**: `POST http://127.0.0.1:8000/api/cases/`
+* **Auth Required**: Yes
+* **Request Body**:
+```json
+{
+  "fir_number": "FIR-456",
+  "crime_type": "BURGLARY",
+  "incident_date_time": "2026-07-14T10:00:00Z",
+  "reported_date_time": "2026-07-14T11:30:00Z",
+  "location": "Indiranagar, Bengaluru",
+  "latitude": 12.9716,
+  "longitude": 77.6412,
+  "status": "PENDING",
+  "description": "Burglary reported at warehouse."
+}
+```
 
 ---
 
-## 12. UI/UX Principles
+### C. Accused / Suspects Records API (Django - Port 8000)
 
-1.  **Professionalism**: Minimize gradients and rounded buttons. Keep lines clean and borders thin.
-2.  **Readability**: Strict typography scales. Colors must meet WCAG AA contrast standards for dark mode readability.
-3.  **Low Latency (Fast)**: Optimize bundle sizes. Use skeleton loaders to keep page transitions feeling immediate.
-4.  **No Hallucination**: AI responses must highlight exactly what data is verified from the database and what remains unverified.
-5.  **Information Density**: Grids, metrics, and details are compact to maximize the volume of intelligence visible on screen at once.
+#### 1. List Accused Persons
+* **Endpoint**: `GET http://127.0.0.1:8000/api/accused/`
+* **Query Parameters**: `?fir=<fir_uuid>` (optional filter by case ID)
+* **Auth Required**: Yes
+* **Success Response (`200 OK`)**:
+```json
+{
+  "count": 5,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "c30474f4-7457-5d05-b459-0efb3725f79c",
+      "name": "John Doe",
+      "alias": "Johnny",
+      "age": 34,
+      "gender": "MALE",
+      "address": "No. 5, 2nd Cross, Koramangala, Bengaluru",
+      "status": "ACCUSED",
+      "prior_convictions_count": 2,
+      "fir": "b20363f3-6346-4c04-a358-9dfa2614f68b"
+    }
+  ]
+}
+```
 
 ---
 
-## 13. Development Roadmap
+### D. Victims Profiles API (Django - Port 8000)
+
+#### 1. List Victims Profiles
+* **Endpoint**: `GET http://127.0.0.1:8000/api/victims/`
+* **Query Parameters**: `?fir=<fir_uuid>` (optional filter)
+* **Auth Required**: Yes
+* **Success Response (`200 OK`)**:
+```json
+{
+  "count": 4,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": "d40585f5-8568-6e06-c560-1fgc4836g80d",
+      "name": "Jane Smith",
+      "age": 29,
+      "contact_number": "+91-9876543210",
+      "statement": "Observed suspect fleeing location at 10:15 AM.",
+      "fir": "b20363f3-6346-4c04-a358-9dfa2614f68b"
+    }
+  ]
+}
+```
+
+---
+
+### E. Investigation Diary Logs API (Django - Port 8000)
+
+#### 1. Add Log Entry
+* **Endpoint**: `POST http://127.0.0.1:8000/api/investigations/`
+* **Auth Required**: Yes
+* **Request Body**:
+```json
+{
+  "fir": "b20363f3-6346-4c04-a358-9dfa2614f68b",
+  "activity_summary": "Searched suspect's prior residence.",
+  "activity_details": "No physical clues retrieved at Indiranagar house.",
+  "date_time": "2026-07-14T14:00:00Z"
+}
+```
+
+---
+
+### F. Agentic Conversational AI API (FastAPI - Port 8001)
+
+#### 1. Ask AI Assistant
+* **Endpoint**: `POST http://127.0.0.1:8001/ai/ask`
+* **Headers**: `Authorization: Bearer <access_token>`, `Content-Type: application/json`
+* **Request Body**:
+```json
+{
+  "session_id": "chatbot-session-101",
+  "user_id": "officer-john-1",
+  "question": "Where does John Doe live?"
+}
+```
+* **Success Response (`200 OK`)**:
+```json
+{
+  "success": true,
+  "message": "ok",
+  "data": {
+    "answer": "John Doe lives at No. 5, 2nd Cross, Koramangala.",
+    "intent": "suspect_query",
+    "summary": "user: Where does John Doe live?",
+    "case_summary": null,
+    "evidence_used": 2
+  },
+  "metadata": {
+    "intent": "suspect_query",
+    "evidence_sources": 2,
+    "api_records": 1,
+    "langgraph_enabled": true,
+    "confidence": "high",
+    "evidence_threshold_met": true,
+    "rag_citations": 1,
+    "sql_citations": 1,
+    "evidence_source_breakdown": {
+      "accused_records": 1,
+      "django_api": 1
+    }
+  },
+  "citations": [
+    {
+      "source": "accused_records",
+      "reference_id": "b20363f3-6346-4c04-a358-9dfa2614f68b",
+      "snippet": "id=b20363f3-6346-4c04-a358-9dfa2614f68b; name=John Doe; address=No. 5, 2nd Cross, Koramangala; status=ACCUSED",
+      "score": null
+    }
+  ],
+  "errors": null
+}
+```
+
+#### 2. System Health Check
+* **Endpoint**: `GET http://127.0.0.1:8001/health`
+* **Auth Required**: No
+* **Success Response (`200 OK`)**:
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-07-21T12:00:00Z"
+}
+```
+
+---
+
+## 5. Frontend Axios Client & Auth Store Implementation
+
+### A. Axios Client with Auto-Refresh Interceptor (`src/api/client.js` or `src/api/client.ts`)
+
+```javascript
+import axios from 'axios'
+import { useAuthStore } from '../store/useAuthStore'
+
+export const DJANGO_BASE_URL = import.meta.env.VITE_DJANGO_BASE_URL || 'http://127.0.0.1:8000'
+export const FASTAPI_BASE_URL = import.meta.env.VITE_FASTAPI_BASE_URL || 'http://127.0.0.1:8001'
+
+export const apiClient = axios.create({
+  baseURL: DJANGO_BASE_URL,
+  timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+export const aiClient = axios.create({
+  baseURL: FASTAPI_BASE_URL,
+  timeout: 15000,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+const addAuthToken = (config) => {
+  const token = useAuthStore.getState().accessToken
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+}
+
+apiClient.interceptors.request.use(addAuthToken, (error) => Promise.reject(error))
+aiClient.interceptors.request.use(addAuthToken, (error) => Promise.reject(error))
+
+let isRefreshing = false
+let refreshSubscribers = []
+
+const subscribeTokenRefresh = (cb) => { refreshSubscribers.push(cb) }
+const onRefreshed = (token) => {
+  refreshSubscribers.forEach((cb) => cb(token))
+  refreshSubscribers = []
+}
+
+const handleTokenRefresh = async (error, clientInstance) => {
+  const { config, response } = error
+  const originalRequest = config
+
+  if (response && response.status === 401 && !originalRequest._retry) {
+    if (originalRequest.url?.includes('/api/auth/login/') || originalRequest.url?.includes('/api/auth/refresh/')) {
+      return Promise.reject(error)
+    }
+
+    if (isRefreshing) {
+      return new Promise((resolve) => {
+        subscribeTokenRefresh((token) => {
+          originalRequest.headers.Authorization = `Bearer ${token}`
+          resolve(clientInstance(originalRequest))
+        })
+      })
+    }
+
+    originalRequest._retry = true
+    isRefreshing = true
+
+    const refreshToken = useAuthStore.getState().refreshToken
+    if (!refreshToken) {
+      useAuthStore.getState().logout()
+      return Promise.reject(error)
+    }
+
+    try {
+      const res = await axios.post(`${DJANGO_BASE_URL}/api/auth/refresh/`, { refresh: refreshToken })
+      const newAccessToken = res.data.access
+      const newRefreshToken = res.data.refresh || refreshToken
+
+      useAuthStore.getState().setTokens({ access: newAccessToken, refresh: newRefreshToken })
+      onRefreshed(newAccessToken)
+      isRefreshing = false
+
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+      return clientInstance(originalRequest)
+    } catch (refreshError) {
+      isRefreshing = false
+      refreshSubscribers = []
+      useAuthStore.getState().logout()
+      return Promise.reject(refreshError)
+    }
+  }
+
+  return Promise.reject(error)
+}
+
+apiClient.interceptors.response.use((r) => r, (e) => handleTokenRefresh(e, apiClient))
+aiClient.interceptors.response.use((r) => r, (e) => handleTokenRefresh(e, aiClient))
+```
+
+---
+
+## 6. TanStack Query Custom Hooks for Component Integration
+
+Use these hooks inside React components to connect UI elements directly to live backend services with automated caching and loading states:
+
+### A. Case Records Hook (`src/hooks/useCases.js`)
+
+```javascript
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { apiClient } from '../api/client'
+
+export const useCases = (searchQuery = '') => {
+  return useQuery({
+    queryKey: ['cases', searchQuery],
+    queryFn: async () => {
+      const response = await apiClient.get('/api/cases/', {
+        params: searchQuery ? { search: searchQuery } : {},
+      })
+      return response.data.results || response.data
+    },
+    staleTime: 1000 * 30, // 30s cache
+  })
+}
+
+export const useCreateCase = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (newCaseData) => {
+      const response = await apiClient.post('/api/cases/', newCaseData)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cases'] })
+    },
+  })
+}
+```
+
+### B. Accused Records Hook (`src/hooks/useAccused.js`)
+
+```javascript
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '../api/client'
+
+export const useAccused = (firId = '') => {
+  return useQuery({
+    queryKey: ['accused', firId],
+    queryFn: async () => {
+      const response = await apiClient.get('/api/accused/', {
+        params: firId ? { fir: firId } : {},
+      })
+      return response.data.results || response.data
+    },
+  })
+}
+```
+
+### C. Conversational AI Ask Hook (`src/hooks/useAskAI.js`)
+
+```javascript
+import { useMutation } from '@tanstack/react-query'
+import { aiClient } from '../api/client'
+
+export const useAskAI = () => {
+  return useMutation({
+    mutationFn: async ({ sessionId, question, userId = 'officer-1' }) => {
+      const response = await aiClient.post('/ai/ask', {
+        session_id: sessionId,
+        user_id: userId,
+        question,
+      })
+      return response.data
+    },
+  })
+}
+```
+
+---
+
+## 7. Folder Structure Blueprint
 
 ```text
-Phase 1: Project Setup
-  - Initialize Vite + React + TypeScript in `./`
-  - Install TailwindCSS, Radix, and Lucide React
-  - Configure folder structure and Tailwind theme tokens
-
-Phase 2: Authentication Gateway
-  - Setup Axios interceptors and refresh locks
-  - Create the Login View, Zustand auth state, and Route Guard
-
-Phase 3: Core Shell & Navigation
-  - Construct the collapsible Sidebar, Navbar, and DashboardLayout
-  - Configure React Router configurations
-
-Phase 4: High-Density Dashboard
-  - Integrate Recharts widgets (crime trends, alert ticker, quick actions)
-  - Create stats counters and heatmap mock canvas
-
-Phase 5: Case Modules (Relational Tables)
-  - Integrate Case Master list and creation modals
-  - Create accused and victim grids with filtering criteria
-
-Phase 6: Dedicated Conversational AI
-  - Design the `/ai` dedicated layout
-  - Integrate Zustand session stores and Markdown renderers
-  - Construct interactive citation cards and entity details drawers
-
-Phase 7: Analytics & System Logs
-  - Integrate analytics widgets and report exporting (PDF)
-  - Create the audit logs data grid
-
-Phase 8: Hardening & Testing
-  - Perform integration checks, route checks, and responsiveness validation
+src/
+├── api/
+│   └── client.js (or client.ts)          # Axios instances for Django & FastAPI
+├── assets/                                # Icons and logos
+├── components/
+│   ├── feedback/                         # Loaders, skeleton screens, error fallback
+│   └── ui/                               # Shared badges, buttons, cards, drawers
+├── features/
+│   ├── accused/pages/AccusedPage.jsx      # Suspect directory data grid
+│   ├── ai/pages/AIChatPage.jsx           # Dedicated multi-turn AI chat portal
+│   ├── analytics/pages/AnalyticsPage.jsx # Crime trend charts & visualizations
+│   ├── audit/pages/AuditPage.jsx         # Security log grids
+│   ├── auth/pages/LoginPage.jsx          # Security gateway login screen
+│   ├── cases/pages/CasesPage.jsx         # Case file manager
+│   ├── dashboard/pages/DashboardPage.jsx # Main command telemetry hub
+│   └── victims/pages/VictimsPage.jsx     # Victims directory
+├── hooks/
+│   ├── useCases.js                       # TanStack query hook for FIR cases
+│   ├── useAccused.js                     # TanStack query hook for suspect records
+│   └── useAskAI.js                       # TanStack mutation hook for FastAPI AI engine
+├── layouts/
+│   ├── DashboardLayout.jsx               # Master layout with sidebar & header
+│   ├── Navbar.jsx                        # Top bar with officer profile & health states
+│   └── Sidebar.jsx                       # Collapsible navigation menu
+├── routes/
+│   ├── ProtectedRoute.jsx                # Authorization route guard (with DEV_MODE bypass)
+│   └── index.jsx                         # React Router HashRouter mapping
+├── store/
+│   ├── useAuthStore.js                   # Zustand auth token & user state
+│   └── useSessionStore.js                # Zustand sidebar collapse & chat session state
+├── index.css                             # Tailwind directives & CSS custom properties
+└── main.jsx                              # Application entrypoint
 ```
+
+---
+
+## 8. Theme Palette & CSS Custom Variables
+
+Inject the following design system variables into `src/index.css`:
+
+```css
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 38% 6%;    /* #0a0d14 */
+    --foreground: 210 40% 98%;
+    --card: 222 33% 10%;          /* #111622 */
+    --card-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;       /* #3b82f6 - Professional Blue */
+    --secondary: 222 29% 16%;     /* #1c2333 - Muted Border */
+    --destructive: 0 74% 42%;     /* #b91c1c - Alert Danger */
+    --border: 222 29% 16%;
+    --ring: 242 47% 34%;          /* #312e81 - Active Focus */
+    --radius: 0.25rem;
+  }
+}
+
+body {
+  @apply bg-background text-foreground;
+  font-family: 'Outfit', sans-serif;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', monospace;
+}
+```
+
+---
+
+## 9. Quickstart Instructions for Frontend Implementation
+
+1. **Copy this file** (`FRONTEND_ARCHITECTURE.md`) into your frontend project root directory.
+2. **Install core dependencies**:
+   ```bash
+   npm install react-router-dom zustand @tanstack/react-query axios lucide-react recharts dayjs react-hot-toast react-hook-form zod framer-motion clsx tailwind-merge react-is
+   npm install -D tailwindcss@3 postcss autoprefixer vite @vitejs/plugin-react
+   ```
+3. **Set up `.env`**:
+   Set `VITE_DEV_MODE=TRUE` to run in bypass mode, or `VITE_DEV_MODE=FALSE` to test real JWT authentication against Django at `127.0.0.1:8000`.
+4. **Start Dev Server**:
+   ```bash
+   npm run dev
+   ```

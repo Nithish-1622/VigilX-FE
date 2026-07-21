@@ -1,24 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export interface User {
-  username: string;
-  badgeNumber?: string;
-  department?: string;
-  role?: string;
-}
-
-interface AuthState {
-  accessToken: string | null;
-  refreshToken: string | null;
-  user: User | null;
-  isAuthenticated: boolean;
-  login: (tokens: { access: string; refresh: string }, user: User) => void;
-  logout: () => void;
-  setTokens: (tokens: { access: string; refresh: string }) => void;
-}
-
-export const useAuthStore = create<AuthState>()(
+export const useAuthStore = create()(
   persist(
     (set) => ({
       accessToken: null,

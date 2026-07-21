@@ -69,7 +69,7 @@ const caseDistribution = [
   { name: 'Cybercrime', value: 3, color: '#b91c1c' },
 ]
 
-export const DashboardPage: React.FC = () => {
+export const DashboardPage = () => {
   return (
     <div className="space-y-6">
       
@@ -347,7 +347,6 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Recent AI Insights Feed */}
-          {/* Subtle glowing borders or glass overlays are only permitted on the Conversational AI layout / AI tools */}
           <div className="bg-indigo-950/10 border border-[#312e81]/60 rounded-sm p-4 relative overflow-hidden backdrop-blur-sm shadow-[0_0_15px_rgba(49,46,129,0.15)]">
             <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
             <h2 className="text-xs font-bold tracking-widest text-white uppercase flex items-center gap-2 mb-3">
