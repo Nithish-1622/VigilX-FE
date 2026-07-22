@@ -15,42 +15,6 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const MOCK_FALLBACK_ACCUSED = [
-  {
-    id: 'c30474f4-7457-5d05-b459-0efb3725f79c',
-    name: 'John Doe',
-    alias: 'Johnny',
-    age: 34,
-    gender: 'MALE',
-    address: 'No. 5, 2nd Cross, Koramangala, Bengaluru',
-    status: 'ACCUSED',
-    prior_convictions_count: 2,
-    fir: 'b20363f3-6346-4c04-a358-9dfa2614f68b',
-  },
-  {
-    id: 'e60696f6-9679-7f07-d671-2gha5947h91e',
-    name: 'Vikram Singh',
-    alias: 'Vicky',
-    age: 29,
-    gender: 'MALE',
-    address: 'Sector 3, HSR Layout, Bengaluru',
-    status: 'SUSPECT',
-    prior_convictions_count: 0,
-    fir: 'c40474f4-7457-5d05-b459-0efb3725f79d',
-  },
-  {
-    id: 'f70707f7-0780-8008-e782-3hib6058i02f',
-    name: 'Anita Roy',
-    alias: 'Ana',
-    age: 41,
-    gender: 'FEMALE',
-    address: 'Indiranagar 100ft Road, Bengaluru',
-    status: 'IN_CUSTODY',
-    prior_convictions_count: 1,
-    fir: 'd50585f5-8568-6e06-c560-1fgc4836g80e',
-  },
-]
-
 export const AccusedPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('ALL')
@@ -71,7 +35,7 @@ export const AccusedPage = () => {
   const { data: apiAccused, isLoading, isError } = useAccused()
   const createAccusedMutation = useCreateAccused()
 
-  const rawAccused = apiAccused && Array.isArray(apiAccused) && apiAccused.length > 0 ? apiAccused : MOCK_FALLBACK_ACCUSED
+  const rawAccused = Array.isArray(apiAccused) ? apiAccused : []
 
   const filteredAccused = rawAccused.filter((a) => {
     const matchesSearch =
@@ -117,13 +81,8 @@ export const AccusedPage = () => {
         })
       },
       onError: (err) => {
-        console.warn('API submission error, adding locally in dev state:', err)
-        toast.success(`Suspect ${formData.name} added (Local Dev Session)`)
-        MOCK_FALLBACK_ACCUSED.unshift({
-          id: `dev-acc-${Date.now()}`,
-          ...payload,
-        })
-        setIsModalOpen(false)
+        console.error('Accused creation failed:', err)
+        toast.error('Unable to create the suspect record.')
       },
     })
   }

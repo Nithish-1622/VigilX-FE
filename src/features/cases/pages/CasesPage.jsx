@@ -17,45 +17,6 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const MOCK_FALLBACK_CASES = [
-  {
-    id: 'b20363f3-6346-4c04-a358-9dfa2614f68b',
-    fir_number: 'FIR-123',
-    crime_type: 'THEFT',
-    incident_date_time: '2026-07-14T10:00:00Z',
-    reported_date_time: '2026-07-14T11:30:00Z',
-    location: 'Koramangala, Bengaluru',
-    latitude: 12.9352,
-    longitude: 77.6245,
-    status: 'PENDING',
-    description: 'Larceny reported at electronic retail store.',
-  },
-  {
-    id: 'c40474f4-7457-5d05-b459-0efb3725f79d',
-    fir_number: 'FIR-456',
-    crime_type: 'BURGLARY',
-    incident_date_time: '2026-07-14T10:00:00Z',
-    reported_date_time: '2026-07-14T11:30:00Z',
-    location: 'Indiranagar, Bengaluru',
-    latitude: 12.9716,
-    longitude: 77.6412,
-    status: 'INVESTIGATING',
-    description: 'Burglary reported at warehouse storage unit.',
-  },
-  {
-    id: 'd50585f5-8568-6e06-c560-1fgc4836g80e',
-    fir_number: 'FIR-789',
-    crime_type: 'CYBER_FRAUD',
-    incident_date_time: '2026-07-12T16:20:00Z',
-    reported_date_time: '2026-07-12T18:00:00Z',
-    location: 'HSR Layout, Bengaluru',
-    latitude: 12.9121,
-    longitude: 77.6445,
-    status: 'SOLVED',
-    description: 'Financial phishing incident reported by commercial bank branch.',
-  },
-]
-
 export const CasesPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('ALL')
@@ -78,8 +39,7 @@ export const CasesPage = () => {
   const { data: apiCases, isLoading, isError } = useCases(searchQuery)
   const createCaseMutation = useCreateCase()
 
-  // Blend live API results with fallback mock if API is unreachable/empty during dev mode
-  const rawCases = apiCases && Array.isArray(apiCases) && apiCases.length > 0 ? apiCases : MOCK_FALLBACK_CASES
+  const rawCases = Array.isArray(apiCases) ? apiCases : []
 
   const filteredCases = rawCases.filter((c) => {
     const matchesSearch =
@@ -128,13 +88,8 @@ export const CasesPage = () => {
         })
       },
       onError: (err) => {
-        console.warn('API submission error, adding locally in dev state:', err)
-        toast.success(`FIR Case ${formData.fir_number} created (Local Dev Session)`)
-        MOCK_FALLBACK_CASES.unshift({
-          id: `dev-${Date.now()}`,
-          ...payload,
-        })
-        setIsModalOpen(false)
+        console.error('Case creation failed:', err)
+        toast.error('Unable to create the FIR case.')
       },
     })
   }

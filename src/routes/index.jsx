@@ -2,6 +2,7 @@ import React from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from './ProtectedRoute.jsx'
 import { DashboardLayout } from '../layouts/DashboardLayout.jsx'
+import { isDevMode } from '../lib/env'
 
 // Public routes
 import { LandingPage } from '../features/landing/LandingPage.jsx'
@@ -24,7 +25,7 @@ export const AppRoutes = () => {
         {/* ── Public routes (no auth required) ── */}
         <Route path="/"        element={<LandingPage />} />
         <Route path="/landing" element={<LandingPage />} />
-        <Route path="/login"   element={<LoginPage />} />
+        <Route path="/login"   element={isDevMode ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
 
         {/* ── Protected platform routes ── */}
         <Route element={<ProtectedRoute />}>
@@ -42,7 +43,7 @@ export const AppRoutes = () => {
           </Route>
         </Route>
 
-        {/* ── Catch-all: redirect to root landing page ── */}
+        {/* ── Catch-all: redirect ── */}
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>

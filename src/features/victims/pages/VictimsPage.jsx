@@ -14,33 +14,6 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const MOCK_FALLBACK_VICTIMS = [
-  {
-    id: 'd40585f5-8568-6e06-c560-1fgc4836g80d',
-    name: 'Jane Smith',
-    age: 29,
-    contact_number: '+91-9876543210',
-    statement: 'Observed suspect fleeing location at 10:15 AM in a dark sedan.',
-    fir: 'b20363f3-6346-4c04-a358-9dfa2614f68b',
-  },
-  {
-    id: 'e50696f6-9679-7f07-d671-2gha5947g90e',
-    name: 'Rajesh Sharma',
-    age: 45,
-    contact_number: '+91-9812345678',
-    statement: 'Store lock broken around midnight. Surveillance footage handed over to CID.',
-    fir: 'c40474f4-7457-5d05-b459-0efb3725f79d',
-  },
-  {
-    id: 'f60707f7-0780-8008-e782-3hib6058h01f',
-    name: 'Priya Nair',
-    age: 31,
-    contact_number: '+91-9944556677',
-    statement: 'Received fraudulent phishing link requesting OTP verification.',
-    fir: 'd50585f5-8568-6e06-c560-1fgc4836g80e',
-  },
-]
-
 export const VictimsPage = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -57,7 +30,7 @@ export const VictimsPage = () => {
   const { data: apiVictims, isLoading, isError } = useVictims()
   const createVictimMutation = useCreateVictim()
 
-  const rawVictims = apiVictims && Array.isArray(apiVictims) && apiVictims.length > 0 ? apiVictims : MOCK_FALLBACK_VICTIMS
+  const rawVictims = Array.isArray(apiVictims) ? apiVictims : []
 
   const filteredVictims = rawVictims.filter((v) => {
     return (
@@ -98,13 +71,8 @@ export const VictimsPage = () => {
         })
       },
       onError: (err) => {
-        console.warn('API submission error, adding locally in dev state:', err)
-        toast.success(`Victim profile for ${formData.name} recorded (Local Dev Session)`)
-        MOCK_FALLBACK_VICTIMS.unshift({
-          id: `dev-vic-${Date.now()}`,
-          ...payload,
-        })
-        setIsModalOpen(false)
+        console.error('Victim creation failed:', err)
+        toast.error('Unable to create the victim profile.')
       },
     })
   }

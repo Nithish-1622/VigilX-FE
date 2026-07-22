@@ -1,12 +1,12 @@
 import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '../store/useAuthStore'
+import { isDevMode } from '../lib/env'
 
 export const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
-  const isDevMode = import.meta.env.VITE_DEV_MODE === 'TRUE'
+  const accessToken = useAuthStore((state) => state.accessToken)
 
-  if (!isAuthenticated && !isDevMode) {
+  if (!accessToken && !isDevMode) {
     return <Navigate to="/login" replace />
   }
 

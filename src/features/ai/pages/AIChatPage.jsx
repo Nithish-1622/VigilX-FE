@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAskAI } from '../../../hooks/useAskAI'
 import { useSessionStore } from '../../../store/useSessionStore'
@@ -6,95 +6,78 @@ import { WelcomeConsole } from '../components/WelcomeConsole'
 import { WorkspaceHeader } from '../components/WorkspaceHeader'
 import { InvestigationHistorySidebar } from '../components/InvestigationHistorySidebar'
 import { InvestigationReportCard } from '../components/InvestigationReportCard'
-import { MOCK_GRAPH_DATA } from '../components/GraphPanel'
 import { Send, Loader2 } from 'lucide-react'
 
-// ─── Dev mode realistic report generation ─────────────────────────────────────
-const buildDevResponse = (question) => {
-  const q = question.toLowerCase()
+const toDisplayText = (value) => {
+  if (value === null || value === undefined) return ''
+  if (typeof value === 'string') return value
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (Array.isArray(value)) return value.map(toDisplayText).filter(Boolean).join(', ')
+  if (typeof value === 'object') return value.name ?? value.label ?? value.title ?? JSON.stringify(value)
+  return String(value)
+}
 
-  const baseReport = {
-    id: `REP-${Math.floor(Math.random() * 10000)}`,
+const normalizeKeyDetails = (details) => {
+  if (!details || typeof details !== 'object' || Array.isArray(details)) {
+    return {}
+  }
+
+  return Object.entries(details).reduce((acc, [key, value]) => {
+    const normalized = toDisplayText(value)
+    if (normalized !== '') {
+      acc[key] = normalized
+    }
+    return acc
+  }, {})
+}
+
+const normalizeFollowUps = (followUps) => {
+  if (!Array.isArray(followUps)) return []
+  return followUps.map(toDisplayText).filter(Boolean)
+}
+
+const normalizeTimeline = (timeline) => {
+  if (!Array.isArray(timeline)) return []
+
+  return timeline
+    .map((event) => {
+      if (!event || typeof event !== 'object') return null
+      return {
+        event: toDisplayText(event.event ?? event.title ?? event.label ?? ''),
+        time: toDisplayText(event.time ?? event.date_time ?? event.timestamp ?? ''),
+        description: toDisplayText(event.description ?? event.details ?? ''),
+      }
+    })
+    .filter((event) => event && event.event)
+}
+
+const buildReport = (question, response) => {
+  const payload = response.data ?? response
+  const data = payload.data ?? payload
+  const metadata = payload.metadata ?? data.metadata ?? {}
+  const answer = data.answer ?? data.summary ?? payload.message ?? 'No answer returned from AI engine.'
+
+  return {
+    id: payload.id ?? data.id ?? `REP-${Date.now()}`,
     timestamp: new Date().toISOString().split('T')[0],
     query: question,
-    summary: '',
-    keyDetails: {},
+    summary: answer,
+    keyDetails: normalizeKeyDetails(data.key_details ?? data.keyDetails ?? {
+      intent: data.intent ?? metadata.intent ?? 'unknown',
+      evidence_used: data.evidence_used ?? metadata.evidence_sources ?? 0,
+      case_summary: data.case_summary ?? null,
+    }),
     evidence: {
-      confidence: 'high',
-      sourcesCount: 3,
-      citations: [],
-      ragCitations: 2,
-      sqlCitations: 1,
-      langGraphActive: true,
+      confidence: metadata.confidence ?? data.confidence ?? 'medium',
+      sourcesCount: metadata.evidence_sources ?? data.evidence_used ?? 0,
+      citations: payload.citations ?? data.citations ?? [],
+      ragCitations: metadata.rag_citations ?? 0,
+      sqlCitations: metadata.sql_citations ?? 0,
+      langGraphActive: metadata.langgraph_enabled ?? false,
     },
-    graphData: null,
-    timeline: [],
-    followUps: [],
-  }
-
-  if (q.includes('john doe') || q.includes('suspect') || q.includes('accused')) {
-    return {
-      ...baseReport,
-      summary: 'John Doe (alias: "Johnny"), age 34, has been identified as the primary accused associated with FIR-123 involving larceny and retail theft.\n\nThe available records indicate two prior convictions and confirm his current residential address in Koramangala. He was last observed fleeing the scene by witness Jane Smith.',
-      keyDetails: {
-        name: 'John Doe',
-        role: 'Accused',
-        associated_FIR: 'FIR-123',
-        location: 'Koramangala',
-        previous_convictions: '2',
-        status: 'Under Investigation',
-        crime_category: 'Larceny/Theft',
-        last_activity: '14 July 2026',
-      },
-      evidence: {
-        ...baseReport.evidence,
-        citations: [
-          { source: 'accused_registry', reference_id: 'REC-091', snippet: 'John Doe, 34, residing at No.5, 2nd Cross, Koramangala. Prior offenses: 2024, 2025.' },
-          { source: 'fir_database', reference_id: 'FIR-123', snippet: 'Primary suspect identified as John Doe based on witness testimony.' }
-        ]
-      },
-      graphData: MOCK_GRAPH_DATA,
-      followUps: ['Explain previous convictions', 'Show connected suspects', 'Reconstruct crime timeline']
-    }
-  }
-
-  if (q.includes('timeline') || q.includes('reconstruct')) {
-    return {
-      ...baseReport,
-      summary: 'Chronological reconstruction of events related to FIR-123 has been compiled based on witness statements, security footage, and official police records.',
-      timeline: [
-        { time: '09:00', event: 'Business Opened', description: 'Retail store opened for business normally.' },
-        { time: '10:00', event: 'Incident Occurred', description: 'Theft incident reported at premises.' },
-        { time: '10:15', event: 'Suspect Fled', description: 'Suspect John Doe observed fleeing the scene by witness Jane Smith.' },
-        { time: '10:42', event: 'Suspect Identified', description: 'Security footage reviewed; suspect formally identified.' },
-        { time: '11:30', event: 'FIR Registered', description: 'FIR-123 registered at Koramangala Police Station.' },
-        { time: '14:00', event: 'Arrest Made', description: 'Accused apprehended at Marathahalli.' },
-      ],
-      evidence: {
-        confidence: 'high',
-        sourcesCount: 2,
-        citations: [{ source: 'cctv_logs', reference_id: 'CAM-4A', snippet: 'Subject matching description captured at 10:15 AM exiting premises.' }],
-        ragCitations: 1,
-        sqlCitations: 1,
-        langGraphActive: true,
-      },
-      followUps: ['Investigate John Doe', 'Show evidence EV-889', 'Summarize FIR-123']
-    }
-  }
-
-  // Default / general fallback
-  return {
-    ...baseReport,
-    summary: 'Multi-agent reasoning completed across the case database and accused registry. No direct high-confidence matches found for your query. To improve results, specify an FIR number, suspect name, or incident location.',
-    evidence: {
-      confidence: 'medium',
-      sourcesCount: 1,
-      citations: [],
-      ragCitations: 1,
-      sqlCitations: 0,
-      langGraphActive: true,
-    },
-    followUps: ['Summarize FIR-2026-101', 'Investigate Rajesh Kumar']
+    graphData: data.graphData ?? data.graph_data ?? null,
+    timeline: normalizeTimeline(data.timeline ?? data.timeline_events ?? []),
+    followUps: normalizeFollowUps(data.followUps ?? data.follow_ups ?? payload.follow_ups ?? []),
   }
 }
 
@@ -106,6 +89,7 @@ export const AIChatPage = () => {
   const [sessionSearch, setSessionSearch] = useState('')
   const [reports, setReports] = useState([])
   const [input, setInput] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const askAIMutation = useAskAI()
   const messagesEndRef = useRef(null)
@@ -151,6 +135,7 @@ export const AIChatPage = () => {
     if (!query || askAIMutation.isPending) return
 
     setInput('')
+    setErrorMessage('')
     const sessionId = currentSessionId ?? createSession(query)
 
     // Optimistic user report structure (could be refined, but we just want to trigger the AI response)
@@ -158,24 +143,17 @@ export const AIChatPage = () => {
     // The query is included in the AI report banner anyway.
     // But to show a loading state, we can add a temporary loading report.
 
-    const tempLoadingId = `loading-${Date.now()}`
-    
     // We only render AI reports, since the user query is clearly stated in the report banner.
 
     askAIMutation.mutate(
-      { sessionId, question: query, userId: 'officer-dev-007' },
+      { sessionId, question: query },
       {
-        onSuccess: (resData) => {
-          // If the backend supported the new structure, we'd map it here.
-          // For now, let's use the dev fallback to ensure the UX is visible.
-          const newReport = buildDevResponse(query)
+        onSuccess: (response) => {
+          const newReport = buildReport(query, response)
           setReports((prev) => [...prev, newReport])
         },
-        onError: () => {
-          setTimeout(() => {
-            const newReport = buildDevResponse(query)
-            setReports((prev) => [...prev, newReport])
-          }, 800)
+        onError: (error) => {
+          setErrorMessage(error.message || 'Unable to retrieve investigation data. Please try again.')
         },
       }
     )
@@ -293,6 +271,12 @@ export const AIChatPage = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {errorMessage && (
+            <div className="absolute left-6 right-6 top-4 z-10 rounded-sm border border-red-900/50 bg-red-950/30 px-4 py-3 text-center font-mono text-xs text-red-300">
+              {errorMessage}
+            </div>
+          )}
 
         </div>
       </div>

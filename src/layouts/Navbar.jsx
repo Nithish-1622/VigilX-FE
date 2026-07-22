@@ -18,13 +18,7 @@ export const Navbar = () => {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const isDevMode = import.meta.env.VITE_DEV_MODE === 'TRUE'
-  const user = storeUser || (isDevMode ? {
-    username: 'dev_officer',
-    badgeNumber: 'DEV-007',
-    department: 'System Development Command',
-    role: 'Developer',
-  } : null)
+  const user = storeUser
 
   const pageTitle = PAGE_TITLES[location.pathname] || location.pathname.replace('/', '').replace(/^./, c => c.toUpperCase())
   const isAIPage = location.pathname === '/ai'

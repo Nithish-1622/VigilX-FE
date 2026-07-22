@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/useAuthStore'
+import { isDevMode } from '../lib/env'
 
 export const DJANGO_BASE_URL = import.meta.env.VITE_DJANGO_BASE_URL || 'http://127.0.0.1:8000'
 export const FASTAPI_BASE_URL = import.meta.env.VITE_FASTAPI_BASE_URL || 'http://127.0.0.1:8001'
@@ -17,6 +18,10 @@ export const aiClient = axios.create({
 })
 
 const addAuthToken = (config) => {
+  if (isDevMode) {
+    return config
+  }
+
   const token = useAuthStore.getState().accessToken
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`
@@ -37,6 +42,10 @@ const onRefreshed = (token) => {
 }
 
 const handleTokenRefresh = async (error, clientInstance) => {
+  if (isDevMode) {
+    return Promise.reject(error)
+  }
+
   const { config, response } = error
   const originalRequest = config
 

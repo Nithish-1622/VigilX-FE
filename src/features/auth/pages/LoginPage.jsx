@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../../store/useAuthStore.js'
 import { apiClient } from '../../../api/client.js'
+import { DEV_USER, isDevMode } from '../../../lib/env'
 import { Shield, Lock, User, Eye, EyeOff, AlertTriangle, Loader2 } from 'lucide-react'
 
 export const LoginPage = () => {
@@ -11,24 +12,18 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const login = useAuthStore((state) => state.login)
+  const setTokens = useAuthStore((state) => state.setTokens)
+  const setUser = useAuthStore((state) => state.setUser)
   const navigate = useNavigate()
 
-  // Dev mode: auto-login and navigate to landing page first
   React.useEffect(() => {
-    if (import.meta.env.VITE_DEV_MODE === 'TRUE') {
-      login(
-        { access: 'dev-mock-access-token', refresh: 'dev-mock-refresh-token' },
-        {
-          username: 'dev_officer',
-          badgeNumber: 'DEV-007',
-          department: 'System Development Command',
-          role: 'Developer',
-        }
-      )
-      navigate('/')
+    if (isDevMode) {
+      setTokens({ access: 'dev-mock-access-token', refresh: 'dev-mock-refresh-token' })
+      setUser(DEV_USER)
+      navigate('/dashboard', { replace: true })
     }
-  }, [login, navigate])
+  }, [navigate, setTokens, setUser])
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -51,7 +46,8 @@ export const LoginPage = () => {
         role: 'Inspector',
       }
 
-      login({ access, refresh }, mockOfficer)
+      setTokens({ access, refresh })
+      setUser(mockOfficer)
       navigate('/') // Navigate to landing first, not dashboard
     } catch (err) {
       console.error('Login failed:', err)
