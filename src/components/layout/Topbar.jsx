@@ -16,7 +16,7 @@ export default function Topbar() {
       className="flex items-center gap-3 flex-shrink-0 relative z-40"
       style={{
         height: 56,
-        padding: '0 20px',
+        padding: '0 24px',
         background: 'rgba(13,17,23,0.92)',
         backdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(255,255,255,0.05)',

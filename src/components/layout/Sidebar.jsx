@@ -1,27 +1,38 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  LayoutDashboard, Database, Brain, FlaskConical,
-  Settings, HelpCircle, ChevronLeft, Shield, Zap
+  LayoutDashboard, Database, Brain, FlaskConical, MessageSquare, GitBranch,
+  Settings, HelpCircle, ChevronLeft, ChevronDown, Shield, Zap
 } from 'lucide-react'
 import useAppStore from '../../store/useAppStore'
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Home',         path: '/app/home',         accent: '#00F0FF' },
-  { icon: Database,        label: 'Data Studio',  path: '/app/data-studio',  accent: '#BF5AF2' },
-  { icon: Brain,           label: 'AI Studio',    path: '/app/ai-studio',    accent: '#00F0FF' },
-  { icon: FlaskConical,    label: 'Experimental', path: '/app/experimental', accent: '#FF9F0A' },
+  { icon: LayoutDashboard, label: 'Home', path: '/app/home', accent: '#00F0FF' },
+  {
+    icon: Database,
+    label: 'Data Studio',
+    path: '/app/data-studio',
+    accent: '#BF5AF2',
+    children: [
+      { icon: Database, label: 'DB Connectors', tab: 'connectors', path: '/app/data-studio?tab=connectors' },
+      { icon: MessageSquare, label: 'DB Chatbot', tab: 'chatbot', path: '/app/data-studio?tab=chatbot' },
+      { icon: GitBranch, label: 'ETL Pipelines', tab: 'pipelines', path: '/app/data-studio?tab=pipelines' },
+    ]
+  },
+  { icon: Brain, label: 'AI Studio', path: '/app/ai-studio', accent: '#00F0FF' },
+  { icon: FlaskConical, label: 'Experimental', path: '/app/experimental', accent: '#FF9F0A' },
 ]
 
 const BOTTOM_ITEMS = [
-  { icon: Settings,   label: 'Settings',    path: '/app/settings', accent: '#8B949E' },
-  { icon: HelpCircle, label: 'Help Center', path: '/app/help',     accent: '#8B949E' },
+  { icon: Settings, label: 'Settings', path: '/app/settings', accent: '#8B949E' },
+  { icon: HelpCircle, label: 'Help Center', path: '/app/help', accent: '#8B949E' },
 ]
 
 export default function Sidebar() {
-  const collapsed    = useAppStore((s) => s.sidebarCollapsed)
+  const collapsed = useAppStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useAppStore((s) => s.toggleSidebar)
-  const navigate     = useNavigate()
+  const navigate = useNavigate()
 
   return (
     <motion.aside
@@ -172,7 +183,119 @@ export default function Sidebar() {
 }
 
 function SidebarItem({ item, collapsed }) {
-  const { icon: Icon, label, path, accent } = item
+  const { icon: Icon, label, path, accent, children } = item
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isParentActive = location.pathname.startsWith(path)
+  const [expanded, setExpanded] = useState(isParentActive)
+
+  useEffect(() => {
+    if (isParentActive) setExpanded(true)
+  }, [isParentActive])
+
+  // If item has dropdown children
+  if (children && children.length > 0) {
+    return (
+      <div className="flex flex-col">
+        {/* Parent item row */}
+        <div
+          onClick={() => {
+            if (!isParentActive) navigate(path)
+            setExpanded(!expanded)
+          }}
+          className="relative flex items-center justify-between gap-2.5 rounded-lg cursor-pointer group transition-colors select-none"
+          style={{
+            padding: '8px 10px',
+            background: isParentActive ? 'rgba(191,90,242,0.08)' : 'transparent',
+            border: isParentActive ? '1px solid rgba(191,90,242,0.2)' : '1px solid transparent',
+          }}
+        >
+          {isParentActive && (
+            <motion.div
+              layoutId="activeBar"
+              className="absolute rounded-r"
+              style={{ left: 0, top: '50%', transform: 'translateY(-50%)', width: 3, height: 20, background: accent }}
+            />
+          )}
+
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <Icon
+              size={17}
+              style={{
+                flexShrink: 0,
+                color: isParentActive ? accent : 'var(--text-secondary)',
+                transition: 'color 0.2s',
+              }}
+            />
+
+            {!collapsed && (
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: isParentActive ? '#fff' : 'var(--text-secondary)',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {label}
+              </span>
+            )}
+          </div>
+
+          {!collapsed && (
+            <motion.div
+              animate={{ rotate: expanded ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ color: 'var(--text-muted)', flexShrink: 0 }}
+            >
+              <ChevronDown size={14} />
+            </motion.div>
+          )}
+        </div>
+
+        {/* Dropdown Children Accordion */}
+        <AnimatePresence>
+          {expanded && !collapsed && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              className="overflow-hidden flex flex-col gap-0.5 ml-4 pl-3 border-l border-[#21262D] mt-1 mb-1"
+            >
+              {children.map((child) => {
+                const currentTab = searchParams.get('tab') || 'connectors'
+                const isChildActive = isParentActive && currentTab === child.tab
+                const ChildIcon = child.icon
+
+                return (
+                  <NavLink key={child.path} to={child.path}>
+                    <motion.div
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium cursor-pointer transition-all"
+                      style={{
+                        background: isChildActive ? 'rgba(0,240,255,0.12)' : 'transparent',
+                        color: isChildActive ? '#00F0FF' : 'var(--text-secondary)',
+                        border: isChildActive ? '1px solid rgba(0,240,255,0.2)' : '1px solid transparent',
+                      }}
+                      whileHover={{ x: 2 }}
+                    >
+                      <ChildIcon size={13} style={{ color: isChildActive ? '#00F0FF' : 'var(--text-muted)' }} />
+                      <span className="truncate">{child.label}</span>
+                    </motion.div>
+                  </NavLink>
+                )
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  }
+
+  // Regular nav item without children
   return (
     <NavLink to={path}>
       {({ isActive }) => (
