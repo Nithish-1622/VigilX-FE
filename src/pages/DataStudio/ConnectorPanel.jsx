@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Database, CheckCircle, AlertCircle, Loader2, RefreshCw,
-  FileText, Globe, Table, FileSpreadsheet, Network
+  Database, CheckCircle, Loader2, RefreshCw,
+  FileText, Globe, Table, FileSpreadsheet, Network, X,
 } from 'lucide-react'
 import { getAdapterTest } from '../../api/vigilx'
 
 const ADAPTER_META = {
   postgresql: { icon: Database, color: '#336791', label: 'PostgreSQL', desc: 'Relational database' },
-  mongodb: { icon: Database, color: '#4DB33D', label: 'MongoDB', desc: 'NoSQL document store' },
-  neo4j: { icon: Network, color: '#008CC1', label: 'Neo4j', desc: 'Graph database' },
-  mysql: { icon: Database, color: '#F29111', label: 'MySQL', desc: 'Relational database' },
-  sqlite: { icon: Database, color: '#0F80CC', label: 'SQLite', desc: 'Embedded database' },
-  csv: { icon: Table, color: '#30D158', label: 'CSV', desc: 'Comma separated values' },
-  excel: { icon: FileSpreadsheet, color: '#1D7A3B', label: 'Excel', desc: 'Spreadsheet files' },
-  pdf: { icon: FileText, color: '#FF3B30', label: 'PDF', desc: 'Document extraction' },
-  json: { icon: FileText, color: '#FFD60A', label: 'JSON', desc: 'JSON data files' },
-  txt: { icon: FileText, color: '#8B949E', label: 'Text', desc: 'Plain text files' },
-  yaml: { icon: FileText, color: '#FF9F0A', label: 'YAML', desc: 'Config/data files' },
-  api: { icon: Globe, color: '#BF5AF2', label: 'REST API', desc: 'External API endpoints' },
+  mongodb:    { icon: Database, color: '#4DB33D', label: 'MongoDB',    desc: 'NoSQL document store' },
+  neo4j:      { icon: Network,  color: '#008CC1', label: 'Neo4j',      desc: 'Graph database' },
+  mysql:      { icon: Database, color: '#F29111', label: 'MySQL',      desc: 'Relational database' },
+  sqlite:     { icon: Database, color: '#0F80CC', label: 'SQLite',     desc: 'Embedded database' },
+  csv:        { icon: Table,    color: '#22C55E', label: 'CSV',        desc: 'Comma-separated values' },
+  excel:      { icon: FileSpreadsheet, color: '#1D7A3B', label: 'Excel', desc: 'Spreadsheet files' },
+  pdf:        { icon: FileText, color: '#F03E3E', label: 'PDF',        desc: 'Document extraction' },
+  json:       { icon: FileText, color: '#EAB308', label: 'JSON',       desc: 'JSON data files' },
+  txt:        { icon: FileText, color: '#64748B', label: 'Text',       desc: 'Plain text files' },
+  yaml:       { icon: FileText, color: '#F59E0B', label: 'YAML',       desc: 'Config / data files' },
+  api:        { icon: Globe,    color: '#A855F7', label: 'REST API',   desc: 'External API endpoints' },
 }
 
 export default function ConnectorPanel() {
@@ -36,151 +36,295 @@ export default function ConnectorPanel() {
       setSystemMsg(data.message || '')
       setStatus('success')
     } catch {
-      // Fallback to full mock set
       setAdapters(Object.keys(ADAPTER_META))
-      setSystemMsg('Adapter successfully connected and metadata synced to Postgres!')
+      setSystemMsg('Adapter registry loaded · 12 connectors available')
       setStatus('mock')
     }
   }
 
   useEffect(() => { fetchAdapters() }, [])
 
-  const handleConnect = (adapter) => {
-    setSelected(adapter)
-    setConnConfig({ host: '', port: '', database: '', user: '', password: '' })
-  }
-
   return (
-    <div className="space-y-5">
-      {/* Status Banner */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Status banner */}
       <div
-        className="flex items-center justify-between px-4 py-3 rounded-xl text-sm"
         style={{
-          background: status === 'loading' ? 'rgba(139,148,158,0.08)' : 'rgba(48,209,88,0.08)',
-          border: `1px solid ${status === 'loading' ? 'rgba(139,148,158,0.2)' : 'rgba(48,209,88,0.2)'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 14px',
+          borderRadius: 8,
+          background: status === 'loading' ? 'var(--bg-tertiary)' : 'rgba(34,197,94,0.06)',
+          border: `1px solid ${status === 'loading' ? 'var(--border-subtle)' : 'rgba(34,197,94,0.15)'}`,
         }}
       >
-        <div className="flex items-center gap-2.5">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {status === 'loading' ? (
-            <Loader2 size={14} className="text-text-secondary animate-spin" />
+            <Loader2 size={13} style={{ color: 'var(--text-secondary)', animation: 'spin 1s linear infinite' }} />
           ) : (
-            <CheckCircle size={14} className="text-accent-green" />
+            <CheckCircle size={13} style={{ color: '#22C55E' }} />
           )}
-          <span style={{ color: status === 'loading' ? 'var(--text-secondary)' : 'var(--accent-green)' }}>
-            {status === 'loading' ? 'Connecting to adapter registry...' : systemMsg}
+          <span
+            style={{
+              fontSize: 12,
+              color: status === 'loading' ? 'var(--text-secondary)' : '#22C55E',
+            }}
+          >
+            {status === 'loading' ? 'Connecting to adapter registry…' : systemMsg}
           </span>
-          {status === 'mock' && (
-            <span className="tag-cyan text-[10px]">Mock Data</span>
-          )}
+          {status === 'mock' && <span className="tag-cyan" style={{ fontSize: 9 }}>Mock</span>}
         </div>
         <button
           onClick={fetchAdapters}
-          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-accent-cyan transition-colors"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+            fontSize: 11,
+            color: 'var(--text-muted)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'color 0.12s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--accent-cyan)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
         >
-          <RefreshCw size={12} /> Refresh
+          <RefreshCw size={11} /> Refresh
         </button>
       </div>
 
-      {/* Adapter Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      {/* Adapter grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+          gap: 10,
+        }}
+      >
         {adapters.map((key, i) => {
-          const meta = ADAPTER_META[key] || { icon: Database, color: '#8B949E', label: key, desc: 'Database adapter' }
+          const meta = ADAPTER_META[key] || { icon: Database, color: '#64748B', label: key, desc: 'Database adapter' }
           const Icon = meta.icon
           return (
             <motion.div
               key={key}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.05 }}
-              onClick={() => handleConnect(key)}
-              className="glass rounded-xl p-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 group"
-              style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-              whileHover={{ borderColor: `${meta.color}40` }}
+              transition={{ delay: i * 0.04, duration: 0.15 }}
+              onClick={() => {
+                setSelected(key)
+                setConnConfig({ host: '', port: '', database: '', user: '', password: '' })
+              }}
+              style={{
+                padding: '14px',
+                borderRadius: 9,
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = `${meta.color}35`
+                e.currentTarget.style.background = 'var(--bg-tertiary)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--border-subtle)'
+                e.currentTarget.style.background = 'var(--bg-secondary)'
+              }}
             >
               <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-                style={{ background: `${meta.color}18`, border: `1px solid ${meta.color}30` }}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  background: `${meta.color}10`,
+                  border: `1px solid ${meta.color}20`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 10,
+                }}
               >
-                <Icon size={18} style={{ color: meta.color }} />
+                <Icon size={16} style={{ color: meta.color }} />
               </div>
-              <p className="text-sm font-semibold text-white">{meta.label}</p>
-              <p className="text-xs text-text-muted mt-0.5">{meta.desc}</p>
-              <div className="mt-3 flex items-center gap-1.5">
-                <div className="status-dot idle" />
-                <span className="text-[10px] text-text-muted">Not connected</span>
-              </div>
-              <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-[10px] text-accent-cyan">Click to configure →</span>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 2px' }}>
+                {meta.label}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '0 0 8px' }}>{meta.desc}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: '50%',
+                    background: 'var(--text-muted)',
+                    display: 'inline-block',
+                  }}
+                />
+                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Not connected</span>
               </div>
             </motion.div>
           )
         })}
       </div>
 
-      {/* Connection Config Modal */}
+      {/* Connection modal */}
       <AnimatePresence>
         {selected && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 16,
+              background: 'rgba(0,0,0,0.65)',
+              backdropFilter: 'blur(6px)',
+            }}
             onClick={(e) => e.target === e.currentTarget && setSelected(null)}
           >
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
+              initial={{ scale: 0.95, y: 12 }}
               animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-w-md glass-heavy rounded-2xl p-6"
+              exit={{ scale: 0.95, y: 8 }}
+              transition={{ duration: 0.15 }}
+              style={{
+                width: '100%',
+                maxWidth: 420,
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-active)',
+                borderRadius: 12,
+                overflow: 'hidden',
+              }}
             >
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+              {/* Modal header */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '14px 16px',
+                  borderBottom: '1px solid var(--border-subtle)',
+                  background: 'var(--bg-tertiary)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {(() => {
+                    const meta = ADAPTER_META[selected]
+                    if (!meta) return null
+                    const Icon = meta.icon
+                    return (
+                      <div
+                        style={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: 7,
+                          background: `${meta.color}10`,
+                          border: `1px solid ${meta.color}20`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Icon size={14} style={{ color: meta.color }} />
+                      </div>
+                    )
+                  })()}
+                  <div>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                      Configure {ADAPTER_META[selected]?.label || selected}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+                      {ADAPTER_META[selected]?.desc}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
                   style={{
-                    background: `${ADAPTER_META[selected]?.color || '#8B949E'}18`,
-                    border: `1px solid ${ADAPTER_META[selected]?.color || '#8B949E'}30`,
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-muted)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: 4,
+                    borderRadius: 5,
+                    transition: 'all 0.12s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--text-secondary)'
+                    e.currentTarget.style.background = 'var(--bg-elevated)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--text-muted)'
+                    e.currentTarget.style.background = 'none'
                   }}
                 >
-                  {ADAPTER_META[selected] && (() => {
-                    const Icon = ADAPTER_META[selected].icon
-                    return <Icon size={18} style={{ color: ADAPTER_META[selected].color }} />
-                  })()}
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">
-                    Configure {ADAPTER_META[selected]?.label || selected}
-                  </h3>
-                  <p className="text-xs text-text-muted">{ADAPTER_META[selected]?.desc}</p>
-                </div>
+                  <X size={14} />
+                </button>
               </div>
 
-              <div className="space-y-3">
+              {/* Modal body */}
+              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {['host', 'port', 'database', 'user', 'password'].map((field) => (
                   <div key={field}>
-                    <label className="block text-xs text-text-secondary mb-1.5 capitalize">{field}</label>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
+                        marginBottom: 5,
+                        textTransform: 'capitalize',
+                      }}
+                    >
+                      {field}
+                    </label>
                     <input
                       type={field === 'password' ? 'password' : 'text'}
-                      placeholder={field === 'host' ? 'localhost' : field === 'port' ? '5432' : `Enter ${field}`}
+                      placeholder={
+                        field === 'host' ? 'localhost' : field === 'port' ? '5432' : `Enter ${field}`
+                      }
                       value={connConfig[field] || ''}
                       onChange={(e) => setConnConfig((c) => ({ ...c, [field]: e.target.value }))}
                       className="input-cyber"
+                      style={{ fontSize: 12 }}
                     />
                   </div>
                 ))}
               </div>
 
-              <div className="flex gap-3 mt-5">
-                <button onClick={() => setSelected(null)} className="flex-1 py-2.5 rounded-lg text-sm text-text-secondary hover:text-white transition-colors border border-border-active">
+              {/* Modal footer */}
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  padding: '12px 16px',
+                  borderTop: '1px solid var(--border-subtle)',
+                }}
+              >
+                <button
+                  onClick={() => setSelected(null)}
+                  className="btn-secondary"
+                  style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
+                >
                   Cancel
                 </button>
                 <button
-                  className="flex-1 btn-solid-cyan py-2.5 rounded-lg text-sm"
+                  className="btn-primary"
+                  style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
                   onClick={() => {
                     setSelected(null)
                     alert('Connection test initiated!')
                   }}
                 >
-                  Test & Connect
+                  Test &amp; Connect
                 </button>
               </div>
             </motion.div>

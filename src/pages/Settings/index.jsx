@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Settings, User, Key, Bell, Palette, Shield, Save, Eye, EyeOff } from 'lucide-react'
+import { User, Key, Bell, Palette, Shield, Save, Eye, EyeOff, Sun, Moon } from 'lucide-react'
+import useAppStore from '../../store/useAppStore'
 
 const SECTIONS = [
   { id: 'profile', label: 'Profile', icon: User },
@@ -13,109 +14,261 @@ const SECTIONS = [
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState('profile')
   const [showKey, setShowKey] = useState(false)
+  const theme = useAppStore((s) => s.theme)
+  const setTheme = useAppStore((s) => s.setTheme)
 
   return (
-    <div className="space-y-6">
-      <div className="pb-2 border-b border-[#21262D]/60">
-        <h1 className="text-2xl font-extrabold text-white tracking-tight">System Settings</h1>
-        <p className="text-xs text-[#8B949E] mt-1">Configure clearance roles, API integrations, security policies & preferences</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Page header */}
+      <div style={{ paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Settings</h1>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 3 }}>
+          Configure roles, API integrations, and preferences
+        </p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6 items-start">
-        {/* Left Section Navigation */}
-        <div className="w-full md:w-56 flex-shrink-0 space-y-1 bg-[#161B22]/40 p-2 rounded-xl border border-[#21262D]">
-          {SECTIONS.map((s) => (
-            <button
-              key={s.id}
-              id={`settings-${s.id}`}
-              onClick={() => setActiveSection(s.id)}
-              className="flex items-center gap-2.5 w-full px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: activeSection === s.id ? 'rgba(0,240,255,0.12)' : 'transparent',
-                color: activeSection === s.id ? '#00F0FF' : '#8B949E',
-                border: activeSection === s.id ? '1px solid rgba(0,240,255,0.25)' : '1px solid transparent',
-              }}
-            >
-              <s.icon size={15} />
-              {s.label}
-            </button>
-          ))}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+        {/* Left nav */}
+        <div
+          style={{
+            width: 200,
+            flexShrink: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 9,
+            padding: '6px',
+          }}
+        >
+          {SECTIONS.map((s) => {
+            const isActive = activeSection === s.id
+            return (
+              <button
+                key={s.id}
+                id={`settings-${s.id}`}
+                onClick={() => setActiveSection(s.id)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 10px',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  background: isActive ? 'var(--bg-elevated)' : 'transparent',
+                  border: `1px solid ${isActive ? 'var(--border-active)' : 'transparent'}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.12s',
+                  width: '100%',
+                  textAlign: 'left',
+                }}
+                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--text-primary)' }}
+                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)' }}
+              >
+                <s.icon size={14} style={{ color: isActive ? 'var(--accent-cyan)' : 'inherit', flexShrink: 0 }} />
+                {s.label}
+              </button>
+            )
+          })}
         </div>
 
-        {/* Right Section Content Panel */}
+        {/* Content panel */}
         <motion.div
           key={activeSection}
-          initial={{ opacity: 0, x: 10 }}
+          initial={{ opacity: 0, x: 8 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex-1 w-full glass rounded-xl p-6 border border-[#21262D]"
+          transition={{ duration: 0.15 }}
+          style={{
+            flex: 1,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 9,
+            padding: '20px',
+          }}
         >
           {activeSection === 'profile' && (
-            <div className="space-y-5">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">Profile Information</h2>
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-[#161B22]/60 border border-[#21262D]">
-                <div className="w-14 h-14 rounded-xl flex items-center justify-center text-lg font-black text-white bg-gradient-to-br from-[#BF5AF2] to-[#8B5CF6] shadow-lg shadow-[#BF5AF2]/20">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                Profile Information
+              </h2>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 14,
+                  padding: '14px',
+                  borderRadius: 8,
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 10,
+                    background: 'linear-gradient(135deg, #A855F7, #7C3AED)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: '#fff',
+                    flexShrink: 0,
+                  }}
+                >
                   OF
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white">Officer Admin</p>
-                  <p className="text-xs text-[#8B949E] mt-0.5">Level 5 Clearance · Jurisdiction: Metropolitan Police HQ</p>
-                  <span className="inline-block mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/20">
-                    Active Duty
-                  </span>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 2px' }}>
+                    Officer Admin
+                  </p>
+                  <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '0 0 6px' }}>
+                    Level 5 Clearance · Metropolitan Police HQ
+                  </p>
+                  <span className="tag-green">Active Duty</span>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[{ label: 'Display Name', val: 'Officer Admin' }, { label: 'Badge ID', val: 'A-5041' }, { label: 'Department', val: 'Cyber Intelligence Unit' }, { label: 'Email', val: 'officer@vigilx.gov' }].map((f) => (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                {[
+                  { label: 'Display Name', val: 'Officer Admin' },
+                  { label: 'Badge ID', val: 'A-5041' },
+                  { label: 'Department', val: 'Cyber Intelligence Unit' },
+                  { label: 'Email', val: 'officer@vigilx.gov' },
+                ].map((f) => (
                   <div key={f.label}>
-                    <label className="block text-xs font-medium text-[#8B949E] mb-1.5">{f.label}</label>
-                    <input defaultValue={f.val} className="w-full bg-[#070A0F] border border-[#30363D] focus:border-[#00F0FF] text-white text-xs px-3.5 py-2.5 rounded-lg outline-none" />
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: 11,
+                        fontWeight: 500,
+                        color: 'var(--text-secondary)',
+                        marginBottom: 6,
+                      }}
+                    >
+                      {f.label}
+                    </label>
+                    <input
+                      defaultValue={f.val}
+                      className="input-cyber"
+                      style={{ fontSize: 12 }}
+                    />
                   </div>
                 ))}
               </div>
-              <button className="btn-solid-cyan px-5 py-2.5 rounded-lg text-xs font-bold flex items-center gap-2">
-                <Save size={14} /> Save Profile Changes
-              </button>
+              <div>
+                <button className="btn-primary" style={{ fontSize: 12 }}>
+                  <Save size={13} /> Save Changes
+                </button>
+              </div>
             </div>
           )}
 
           {activeSection === 'api' && (
-            <div className="space-y-5">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider">API Key Management</h2>
-              {[{ name: 'VigilX Backend API', key: 'vx-sk-a8f2c9b1d4e7f0a3...', status: 'active' }, { name: 'OpenAI Integration', key: 'sk-proj-xxxx...', status: 'active' }, { name: 'Neo4j Graph API', key: 'neo4j-key-xxxx...', status: 'inactive' }].map((k) => (
-                <div key={k.name} className="flex items-center justify-between p-4 rounded-xl bg-[#161B22]/60 border border-[#21262D]">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                API Key Management
+              </h2>
+              {[
+                { name: 'VigilX Backend API', key: 'vx-sk-a8f2c9b1d4e7f0a3...', status: 'active' },
+                { name: 'OpenAI Integration', key: 'sk-proj-xxxx...', status: 'active' },
+                { name: 'Neo4j Graph API', key: 'neo4j-key-xxxx...', status: 'inactive' },
+              ].map((k) => (
+                <div
+                  key={k.name}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    borderRadius: 8,
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-subtle)',
+                  }}
+                >
                   <div>
-                    <p className="text-xs font-bold text-white">{k.name}</p>
-                    <code className="text-xs text-[#8B949E] font-mono mt-1 block">{showKey ? k.key : '••••••••••••••••••••'}</code>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 3px' }}>
+                      {k.name}
+                    </p>
+                    <code
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--text-secondary)',
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {showKey ? k.key : '••••••••••••••••••••'}
+                    </code>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => setShowKey(!showKey)} className="text-[#8B949E] hover:text-white transition-colors">
-                      {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <button
+                      onClick={() => setShowKey(!showKey)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--text-secondary)',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                    >
+                      {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
                     </button>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${k.status === 'active' ? 'bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/20' : 'bg-[#FF3B30]/10 text-[#FF3B30] border border-[#FF3B30]/20'}`}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '2px 7px',
+                        borderRadius: 4,
+                        background: k.status === 'active' ? 'rgba(34,197,94,0.08)' : 'rgba(240,62,62,0.08)',
+                        color: k.status === 'active' ? '#22C55E' : '#F03E3E',
+                        border: `1px solid ${k.status === 'active' ? 'rgba(34,197,94,0.2)' : 'rgba(240,62,62,0.2)'}`,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                      }}
+                    >
                       {k.status}
                     </span>
                   </div>
                 </div>
               ))}
-              <button className="btn-cyber px-4 py-2 rounded-lg text-xs flex items-center gap-2">
-                <Key size={13} /> Generate New API Key
+              <button className="btn-secondary" style={{ width: 'fit-content', fontSize: 12 }}>
+                <Key size={13} /> Generate New Key
               </button>
             </div>
           )}
 
           {activeSection === 'notifications' && (
-            <div className="space-y-4">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Notification Preferences</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                Notification Preferences
+              </h2>
               {[
                 { label: 'Agent Pipeline Completions', desc: 'Notify when V2 analysis finishes' },
                 { label: 'Critical Threat Alerts', desc: 'Immediate alerts for threat level changes' },
                 { label: 'Data Sync Completions', desc: 'Notify when ETL pipelines finish' },
                 { label: 'New Criminal Network Connections', desc: 'Alert when graph discovers new nodes' },
               ].map((n, i) => (
-                <div key={n.label} className="flex items-center justify-between p-4 rounded-xl bg-[#161B22]/40 border border-[#21262D]">
+                <div
+                  key={n.label}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    borderRadius: 8,
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-subtle)',
+                  }}
+                >
                   <div>
-                    <p className="text-xs font-bold text-white">{n.label}</p>
-                    <p className="text-[11px] text-[#8B949E] mt-0.5">{n.desc}</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 2px' }}>
+                      {n.label}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: 0 }}>{n.desc}</p>
                   </div>
                   <Toggle defaultOn={i < 2} />
                 </div>
@@ -124,45 +277,152 @@ export default function SettingsPage() {
           )}
 
           {activeSection === 'appearance' && (
-            <div className="space-y-4">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Theme & Appearance</h2>
-              <div className="p-4 rounded-xl bg-[#161B22]/40 border border-[#21262D]">
-                <p className="text-xs font-semibold text-white mb-3">Color Theme Preset</p>
-                <div className="flex gap-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                Theme &amp; Appearance
+              </h2>
+
+              {/* Theme switcher */}
+              <div
+                style={{
+                  padding: '16px',
+                  borderRadius: 8,
+                  background: 'var(--bg-tertiary)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', margin: '0 0 12px' }}>
+                  Color Mode
+                </p>
+                <div style={{ display: 'flex', gap: 10 }}>
                   {[
-                    { name: 'Cyber Dark', colors: ['#0D1117', '#00F0FF'] },
-                    { name: 'Midnight Defense', colors: ['#050810', '#BF5AF2'] },
-                    { name: 'Steel HQ', colors: ['#1A1F2C', '#8B949E'] },
-                  ].map((t, i) => (
-                    <button key={t.name} className="p-3 rounded-xl border flex flex-col items-center gap-2" style={{ border: i === 0 ? '2px solid #00F0FF' : '1px solid #21262D' }}>
-                      <div className="flex gap-1.5">
-                        {t.colors.map((c) => <div key={c} className="w-4 h-4 rounded" style={{ background: c }} />)}
-                      </div>
-                      <span className="text-[10px] text-[#8B949E]">{t.name}</span>
-                    </button>
-                  ))}
+                    {
+                      id: 'dark',
+                      label: 'Dark',
+                      icon: Moon,
+                      bg: '#0A0C10',
+                      surface: '#111318',
+                      accent: '#00D4FF',
+                      desc: 'Reduced eye strain in low light',
+                    },
+                    {
+                      id: 'light',
+                      label: 'Light',
+                      icon: Sun,
+                      bg: '#F8FAFC',
+                      surface: '#FFFFFF',
+                      accent: '#0284C7',
+                      desc: 'High contrast in bright environments',
+                    },
+                  ].map((t) => {
+                    const isSelected = theme === t.id
+                    const Icon = t.icon
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => setTheme(t.id)}
+                        style={{
+                          flex: 1,
+                          padding: '12px 14px',
+                          borderRadius: 8,
+                          border: `1px solid ${isSelected ? 'var(--accent-cyan)' : 'var(--border-active)'}`,
+                          background: isSelected ? 'rgba(0,212,255,0.05)' : 'var(--bg-primary)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-start',
+                          gap: 10,
+                          transition: 'all 0.15s',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {/* Mini preview swatch */}
+                        <div
+                          style={{
+                            width: '100%',
+                            height: 52,
+                            borderRadius: 6,
+                            background: t.bg,
+                            border: '1px solid rgba(0,0,0,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '0 10px',
+                            gap: 6,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div style={{ width: 28, height: 32, borderRadius: 4, background: t.surface, flexShrink: 0 }} />
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                            <div style={{ height: 5, borderRadius: 2, background: t.accent, width: '60%' }} />
+                            <div style={{ height: 4, borderRadius: 2, background: t.surface, width: '80%' }} />
+                            <div style={{ height: 4, borderRadius: 2, background: t.surface, width: '50%' }} />
+                          </div>
+                        </div>
+
+                        {/* Label row */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Icon size={13} style={{ color: isSelected ? 'var(--accent-cyan)' : 'var(--text-secondary)' }} />
+                            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{t.label}</span>
+                          </div>
+                          {isSelected && (
+                            <span
+                              style={{
+                                width: 16,
+                                height: 16,
+                                borderRadius: '50%',
+                                background: 'var(--accent-cyan)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: 10,
+                                color: '#000',
+                                fontWeight: 700,
+                              }}
+                            >
+                              ✓
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t.desc}</p>
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>
           )}
 
           {activeSection === 'security' && (
-            <div className="space-y-4">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-2">Security Clearance & Governance</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                Security &amp; Governance
+              </h2>
               {[
-                { label: 'Two-Factor Authentication', status: 'Enabled', safe: true },
-                { label: 'Session Timeout', status: '30 minutes', safe: true },
-                { label: 'IP Whitelist Enforcement', status: '3 addresses', safe: true },
-                { label: 'Audit Trail Signature Logging', status: 'Active', safe: true },
+                { label: 'Two-Factor Authentication', status: 'Enabled' },
+                { label: 'Session Timeout', status: '30 minutes' },
+                { label: 'IP Whitelist Enforcement', status: '3 addresses' },
+                { label: 'Audit Trail Logging', status: 'Active' },
               ].map((s) => (
-                <div key={s.label} className="flex items-center justify-between p-4 rounded-xl bg-[#161B22]/40 border border-[#21262D]">
-                  <div className="flex items-center gap-3">
-                    <Shield size={16} className="text-[#30D158]" />
-                    <p className="text-xs font-bold text-white">{s.label}</p>
+                <div
+                  key={s.label}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '12px 14px',
+                    borderRadius: 8,
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border-subtle)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Shield size={14} style={{ color: '#22C55E' }} />
+                    <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }}>
+                      {s.label}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#30D158]/10 text-[#30D158] border border-[#30D158]/20 uppercase">
-                    {s.status}
-                  </span>
+                  <span className="tag-green">{s.status}</span>
                 </div>
               ))}
             </div>
@@ -178,12 +438,29 @@ function Toggle({ defaultOn }) {
   return (
     <button
       onClick={() => setOn(!on)}
-      className="relative w-9 h-5 rounded-full transition-colors flex-shrink-0"
-      style={{ background: on ? '#00F0FF' : '#30363D' }}
+      style={{
+        position: 'relative',
+        width: 34,
+        height: 18,
+        borderRadius: 9,
+        background: on ? 'var(--accent-cyan)' : 'var(--border-active)',
+        border: 'none',
+        cursor: 'pointer',
+        flexShrink: 0,
+        transition: 'background 0.2s',
+      }}
     >
       <span
-        className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform"
-        style={{ transform: on ? 'translateX(16px)' : 'translateX(0)' }}
+        style={{
+          position: 'absolute',
+          top: 2,
+          left: on ? 18 : 2,
+          width: 14,
+          height: 14,
+          borderRadius: '50%',
+          background: on ? '#000' : 'var(--text-muted)',
+          transition: 'left 0.2s',
+        }}
       />
     </button>
   )

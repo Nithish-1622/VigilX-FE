@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { HelpCircle, Book, Video, Activity, ChevronRight, ExternalLink, CheckCircle } from 'lucide-react'
+import { Book, Activity, ChevronRight, ExternalLink } from 'lucide-react'
 
 const DOCS = [
   { title: 'Getting Started with VigilX', desc: 'Set up your account and connect your first data source.', tag: 'Guide' },
@@ -11,66 +11,149 @@ const DOCS = [
 ]
 
 const SYSTEM_STATUS = [
-  { service: 'VigilX Backend API', status: 'operational', uptime: '99.98%' },
-  { service: 'Multi-Agent Orchestrator', status: 'operational', uptime: '99.94%' },
-  { service: 'PostgreSQL Adapter', status: 'operational', uptime: '100%' },
-  { service: 'Neo4j Graph Engine', status: 'operational', uptime: '99.87%' },
-  { service: 'Vector Store', status: 'degraded', uptime: '98.2%' },
-  { service: 'Geospatial Service', status: 'operational', uptime: '99.99%' },
+  { service: 'VigilX Backend API',        status: 'operational', uptime: '99.98%' },
+  { service: 'Multi-Agent Orchestrator',  status: 'operational', uptime: '99.94%' },
+  { service: 'PostgreSQL Adapter',        status: 'operational', uptime: '100%' },
+  { service: 'Neo4j Graph Engine',        status: 'operational', uptime: '99.87%' },
+  { service: 'Vector Store',              status: 'degraded',    uptime: '98.2%' },
+  { service: 'Geospatial Service',        status: 'operational', uptime: '99.99%' },
+]
+
+const QUICK_LINKS = [
+  'Submit a Support Ticket',
+  'Join the VigilX Community',
+  'View Changelog',
+  'Contact Ops Team',
 ]
 
 export default function HelpCenter() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Help Center</h1>
-        <p className="text-sm text-text-secondary mt-0.5">Documentation · Tutorials · System Status</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      {/* Page header */}
+      <div style={{ paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+          Help Center
+        </h1>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 3 }}>
+          Documentation · Tutorials · System status
+        </p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Docs */}
-        <div className="lg:col-span-2 space-y-3">
-          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider">Documentation</h2>
+      {/* Two-column layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 16, alignItems: 'start' }}>
+
+        {/* Left — Documentation */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <p className="section-label">Documentation</p>
           {DOCS.map((doc, i) => (
             <motion.div
               key={doc.title}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass rounded-xl p-4 flex items-center gap-4 hover:border-border-active transition-all cursor-pointer group"
-              style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.04, duration: 0.18 }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '12px 14px',
+                borderRadius: 8,
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-subtle)',
+                cursor: 'pointer',
+                transition: 'border-color 0.15s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-active)')}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}
             >
-              <Book size={16} className="text-accent-cyan flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white group-hover:text-accent-cyan transition-colors">{doc.title}</p>
-                <p className="text-xs text-text-muted mt-0.5">{doc.desc}</p>
+              <Book size={14} style={{ color: 'var(--accent-cyan)', flexShrink: 0 }} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: 'var(--text-primary)',
+                    margin: '0 0 2px',
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  {doc.title}
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: 0 }}>{doc.desc}</p>
               </div>
-              <span className="tag-cyan flex-shrink-0">{doc.tag}</span>
-              <ExternalLink size={13} className="text-text-muted flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="tag-cyan" style={{ flexShrink: 0 }}>{doc.tag}</span>
+              <ExternalLink size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
             </motion.div>
           ))}
         </div>
 
-        {/* System Status */}
-        <div>
-          <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">System Status</h2>
-          <div className="glass rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle">
-              <div className="flex items-center gap-2">
-                <Activity size={13} className="text-accent-green" />
-                <span className="text-xs font-medium text-white">All Systems</span>
+        {/* Right column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+          {/* System status */}
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 9,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '10px 14px',
+                borderBottom: '1px solid var(--border-subtle)',
+                background: 'var(--bg-tertiary)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                <Activity size={13} style={{ color: 'var(--accent-green)' }} />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>
+                  System Status
+                </span>
               </div>
               <span className="tag-green">Mostly Operational</span>
             </div>
-            <div className="divide-y divide-border-subtle/50">
-              {SYSTEM_STATUS.map((s) => (
-                <div key={s.service} className="flex items-center gap-3 px-4 py-3">
-                  <div className={`status-dot ${s.status === 'operational' ? 'active' : 'error'}`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-white truncate">{s.service}</p>
-                    <p className="text-[10px] text-text-muted">{s.uptime} uptime</p>
+
+            <div>
+              {SYSTEM_STATUS.map((s, i) => (
+                <div
+                  key={s.service}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '9px 14px',
+                    borderBottom: i < SYSTEM_STATUS.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: '50%',
+                      background: s.status === 'operational' ? 'var(--accent-green)' : 'var(--accent-red)',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 12, color: 'var(--text-primary)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {s.service}
+                    </p>
+                    <p style={{ fontSize: 10, color: 'var(--text-muted)', margin: 0 }}>{s.uptime} uptime</p>
                   </div>
-                  <span className={s.status === 'operational' ? 'text-accent-green' : 'text-accent-red'} style={{ fontSize: '10px' }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 500,
+                      color: s.status === 'operational' ? 'var(--accent-green)' : 'var(--accent-red)',
+                      textTransform: 'capitalize',
+                      flexShrink: 0,
+                    }}
+                  >
                     {s.status}
                   </span>
                 </div>
@@ -78,21 +161,58 @@ export default function HelpCenter() {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="mt-4 glass rounded-2xl p-4" style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
-            <p className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-3">Quick Help</p>
-            {[
-              'Submit a Support Ticket',
-              'Join the VigilX Community',
-              'View Changelog',
-              'Contact Ops Team',
-            ].map((link) => (
-              <button key={link} className="flex items-center justify-between w-full py-2 text-xs text-text-secondary hover:text-accent-cyan transition-colors group">
-                {link}
-                <ChevronRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-              </button>
-            ))}
+          {/* Quick links */}
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: 9,
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '10px 14px',
+                borderBottom: '1px solid var(--border-subtle)',
+                background: 'var(--bg-tertiary)',
+              }}
+            >
+              <p className="section-label">Quick Help</p>
+            </div>
+            <div style={{ padding: '4px 0' }}>
+              {QUICK_LINKS.map((link) => (
+                <button
+                  key={link}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    padding: '9px 14px',
+                    fontSize: 12,
+                    color: 'var(--text-secondary)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'color 0.12s, background 0.12s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = 'var(--text-primary)'
+                    e.currentTarget.style.background = 'var(--bg-tertiary)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--text-secondary)'
+                    e.currentTarget.style.background = 'none'
+                  }}
+                >
+                  {link}
+                  <ChevronRight size={12} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                </button>
+              ))}
+            </div>
           </div>
+
         </div>
       </div>
     </div>

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Database, MessageSquare, GitBranch, Activity, ChevronRight } from 'lucide-react'
+import { GitBranch } from 'lucide-react'
 import ConnectorPanel from './ConnectorPanel'
 import DBChatbot from './DBChatbot'
 
-const TABS = [
-  { id: 'connectors', label: 'DB Connectors', icon: Database },
-  { id: 'chatbot', label: 'DB Chatbot', icon: MessageSquare },
-  { id: 'pipelines', label: 'ETL Pipelines', icon: GitBranch },
-]
+const PAGE_TITLES = {
+  connectors: { label: 'DB Connectors',  sub: 'Connect and configure database adapters' },
+  chatbot:    { label: 'DB Chatbot',     sub: 'Natural language queries across connected databases' },
+  pipelines:  { label: 'ETL Pipelines',  sub: 'Monitor and manage data ingestion pipelines' },
+}
 
 const PIPELINES = [
   { id: 1, name: 'Crime Reports Ingestion', source: 'CSV → PostgreSQL', status: 'running', records: 1240, duration: '2m 14s' },
@@ -18,65 +18,46 @@ const PIPELINES = [
   { id: 4, name: 'API Intelligence Feed', source: 'REST API → MongoDB', status: 'completed', records: 3320, duration: '1m 02s' },
 ]
 
-const STATUS_COLOR = { running: '#00F0FF', completed: '#30D158', queued: '#8B949E', failed: '#FF3B30' }
+const STATUS_COLOR = {
+  running: '#00D4FF',
+  completed: '#22C55E',
+  queued: '#64748B',
+  failed: '#F03E3E',
+}
 
 export default function DataStudio() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const tabParam = searchParams.get('tab')
   const [tab, setTab] = useState(tabParam || 'connectors')
 
   useEffect(() => {
-    if (tabParam && tabParam !== tab) {
-      setTab(tabParam)
-    }
+    if (tabParam && tabParam !== tab) setTab(tabParam)
   }, [tabParam])
 
-  const handleTabChange = (newTab) => {
-    setTab(newTab)
-    setSearchParams({ tab: newTab })
-  }
+  const current = PAGE_TITLES[tab] || PAGE_TITLES.connectors
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: '#fff', margin: 0 }}>Data Studio</h1>
-        <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-          Universal Database Connector · ETL Pipelines · Data Intelligence
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Page header — updates per active tab */}
+      <div style={{ paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)' }}>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+          {current.label}
+        </h1>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 3 }}>
+          {current.sub}
         </p>
       </div>
 
-      {/* Tab Bar */}
-      <div style={{ display: 'flex', gap: 3, padding: 4, borderRadius: 10, background: 'rgba(22,27,34,0.85)', border: '1px solid rgba(33,38,45,1)', width: 'fit-content' }}>
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            id={`datastudio-tab-${t.id}`}
-            onClick={() => handleTabChange(t.id)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 7,
-              padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 500,
-              background: tab === t.id ? 'rgba(0,240,255,0.12)' : 'transparent',
-              color: tab === t.id ? '#00F0FF' : 'var(--text-secondary)',
-              border: tab === t.id ? '1px solid rgba(0,240,255,0.2)' : '1px solid transparent',
-              cursor: 'pointer', transition: 'all 0.2s',
-            }}
-          >
-            <t.icon size={13} />
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content */}
+      {/* Content */}
       <motion.div
         key={tab}
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.15 }}
       >
         {tab === 'connectors' && <ConnectorPanel />}
-        {tab === 'chatbot' && <DBChatbot />}
-        {tab === 'pipelines' && <PipelineMonitor pipelines={PIPELINES} />}
+        {tab === 'chatbot'    && <DBChatbot />}
+        {tab === 'pipelines'  && <PipelineMonitor pipelines={PIPELINES} />}
       </motion.div>
     </div>
   )
@@ -84,38 +65,97 @@ export default function DataStudio() {
 
 function PipelineMonitor({ pipelines }) {
   return (
-    <div className="glass rounded-xl p-5 border border-[#21262D]">
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#21262D]">
-        <div className="flex items-center gap-2">
-          <GitBranch size={16} className="text-[#BF5AF2]" />
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">ETL Data Ingestion Pipelines</h2>
+    <div
+      style={{
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 10,
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px',
+          borderBottom: '1px solid var(--border-subtle)',
+          background: 'var(--bg-tertiary)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <GitBranch size={14} style={{ color: 'var(--accent-purple)' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+            ETL Data Ingestion Pipelines
+          </span>
         </div>
-        <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/20">
-          4 Active Pipelines
-        </span>
+        <span className="tag-cyan">{pipelines.length} pipelines</span>
       </div>
 
-      <div className="divide-y divide-[#21262D]/60">
-        {pipelines.map((p) => (
-          <div key={p.id} className="py-3 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-white">{p.name}</p>
-              <p className="text-[11px] text-[#8B949E] mt-0.5">{p.source}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-[11px] text-[#8B949E] font-mono">{p.records} records</span>
-              <span className="text-[11px] text-[#8B949E]">{p.duration}</span>
+      {/* Table */}
+      <div>
+        {/* Column headers */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 120px 100px 100px',
+            padding: '8px 16px',
+            borderBottom: '1px solid var(--border-subtle)',
+          }}
+        >
+          {['Pipeline', 'Source / Target', 'Records', 'Duration', 'Status'].map((h) => (
+            <span key={h} className="section-label">{h}</span>
+          ))}
+        </div>
+
+        {pipelines.map((p, i) => (
+          <div
+            key={p.id}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 120px 100px 100px',
+              padding: '12px 16px',
+              borderBottom: i < pipelines.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+              alignItems: 'center',
+              transition: 'background 0.12s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-tertiary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>{p.name}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>{p.source}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+              {p.records.toLocaleString()}
+            </span>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{p.duration}</span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '3px 8px',
+                borderRadius: 4,
+                fontSize: 11,
+                fontWeight: 600,
+                background: `${STATUS_COLOR[p.status]}10`,
+                color: STATUS_COLOR[p.status],
+                border: `1px solid ${STATUS_COLOR[p.status]}25`,
+                textTransform: 'capitalize',
+                width: 'fit-content',
+              }}
+            >
               <span
-                className="text-[10px] font-bold px-2 py-0.5 rounded uppercase"
                 style={{
-                  background: `${STATUS_COLOR[p.status]}15`,
-                  color: STATUS_COLOR[p.status],
-                  border: `1px solid ${STATUS_COLOR[p.status]}30`
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  background: STATUS_COLOR[p.status],
+                  flexShrink: 0,
                 }}
-              >
-                {p.status}
-              </span>
-            </div>
+              />
+              {p.status}
+            </span>
           </div>
         ))}
       </div>

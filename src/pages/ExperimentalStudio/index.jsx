@@ -1,81 +1,179 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FlaskConical, Play, BarChart2, GitBranch, Lock } from 'lucide-react'
+import { FlaskConical, Play, Lock } from 'lucide-react'
+
+const PAGE_TITLES = {
+  experiment: { label: 'Experiments',  sub: 'A/B test prompt strategies and agent configurations' },
+  simulation: { label: 'Simulations',  sub: 'Predictive scenario modeling and disruption analysis' },
+}
 
 const EXPERIMENTS = [
-  { id: 1, name: 'Prompt Strategy A/B Test', desc: 'Compare accuracy of PlanningAgent with different system prompts.', status: 'ready' },
-  { id: 2, name: 'Agent Configuration Alpha', desc: 'Test 5-agent pipeline vs 7-agent full pipeline on narcotics cases.', status: 'draft' },
+  {
+    id: 1,
+    name: 'Prompt Strategy A/B Test',
+    desc: 'Compare accuracy of PlanningAgent with different system prompts.',
+    status: 'ready',
+  },
+  {
+    id: 2,
+    name: 'Agent Configuration Alpha',
+    desc: 'Test 5-agent pipeline vs 7-agent full pipeline on narcotics cases.',
+    status: 'draft',
+  },
 ]
 
 const SIMULATIONS = [
-  { id: 1, name: 'Harbor District — Gang Activity Surge', desc: 'Simulate 30% increase in gang activity based on Q2 historical data.', status: 'ready' },
-  { id: 2, name: 'Narcotics Network Disruption', desc: 'What-if: Remove top 3 nodes from trafficking network.', status: 'draft' },
+  {
+    id: 1,
+    name: 'Harbor District — Gang Activity Surge',
+    desc: 'Simulate 30% increase in gang activity based on Q2 historical data.',
+    status: 'ready',
+  },
+  {
+    id: 2,
+    name: 'Narcotics Network Disruption',
+    desc: 'What-if: Remove top 3 nodes from trafficking network.',
+    status: 'draft',
+  },
 ]
 
 export default function ExperimentalStudio() {
-  const [tab, setTab] = useState('experiment')
+  const [searchParams] = useSearchParams()
+  const tabParam = searchParams.get('tab')
+  const [tab, setTab] = useState(tabParam || 'experiment')
+
+  useEffect(() => {
+    if (tabParam && tabParam !== tab) setTab(tabParam)
+  }, [tabParam])
+
+  const current = PAGE_TITLES[tab] || PAGE_TITLES.experiment
+  const items = tab === 'experiment' ? EXPERIMENTS : SIMULATIONS
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-bold text-white">Experimental Studio</h1>
-        <span className="tag-red flex items-center gap-1.5">
-          <FlaskConical size={10} /> Beta
-        </span>
-      </div>
-      <p className="text-sm text-text-secondary -mt-4">Sandbox environment for investigative modeling, A/B testing, and simulations.</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'rgba(22,27,34,0.8)', border: '1px solid var(--border-subtle)', width: 'fit-content' }}>
-        {[{ id: 'experiment', label: 'Experiments', icon: GitBranch }, { id: 'simulation', label: 'Simulations', icon: BarChart2 }].map((t) => (
-          <button
-            key={t.id}
-            id={`exp-tab-${t.id}`}
-            onClick={() => setTab(t.id)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={{
-              background: tab === t.id ? 'rgba(255,159,10,0.12)' : 'transparent',
-              color: tab === t.id ? 'var(--accent-orange)' : 'var(--text-secondary)',
-              border: tab === t.id ? '1px solid rgba(255,159,10,0.2)' : '1px solid transparent',
-            }}
-          >
-            <t.icon size={14} />
-            {t.label}
-          </button>
-        ))}
+      {/* Page header */}
+      <div style={{ paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            {current.label}
+          </h1>
+          <span className="tag-red" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <FlaskConical size={9} /> Beta
+          </span>
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>{current.sub}</p>
       </div>
 
-      <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        {(tab === 'experiment' ? EXPERIMENTS : SIMULATIONS).map((item, i) => (
+      {/* Item list */}
+      <motion.div
+        key={tab}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.15 }}
+        style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+      >
+        {items.map((item, i) => (
           <motion.div
             key={item.id}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-            className="glass rounded-xl p-5 mb-3 flex items-center gap-4"
-            style={{ border: '1px solid rgba(255,159,10,0.1)' }}
+            transition={{ delay: i * 0.06, duration: 0.18 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 14,
+              padding: '14px 16px',
+              borderRadius: 9,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              transition: 'border-color 0.15s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(245,158,11,0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(255,159,10,0.1)', border: '1px solid rgba(255,159,10,0.2)' }}
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 8,
+                background: 'rgba(245,158,11,0.08)',
+                border: '1px solid rgba(245,158,11,0.18)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
             >
-              <FlaskConical size={18} className="text-accent-orange" />
+              <FlaskConical size={16} style={{ color: 'var(--accent-orange)' }} />
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-white">{item.name}</p>
-              <p className="text-xs text-text-muted mt-0.5">{item.desc}</p>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 3px' }}>
+                {item.name}
+              </p>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4 }}>
+                {item.desc}
+              </p>
             </div>
-            <span className={item.status === 'ready' ? 'tag-green' : 'tag-cyan'} style={{ textTransform: 'capitalize' }}>
+
+            <span
+              className={item.status === 'ready' ? 'tag-green' : 'tag-cyan'}
+              style={{ textTransform: 'capitalize', flexShrink: 0 }}
+            >
               {item.status}
             </span>
-            <button className="btn-cyber px-3 py-1.5 text-xs flex items-center gap-1.5">
+
+            <button
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '6px 12px',
+                borderRadius: 6,
+                fontSize: 12,
+                fontWeight: 500,
+                color: 'var(--accent-orange)',
+                background: 'rgba(245,158,11,0.07)',
+                border: '1px solid rgba(245,158,11,0.2)',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(245,158,11,0.14)'
+                e.currentTarget.style.borderColor = 'rgba(245,158,11,0.4)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(245,158,11,0.07)'
+                e.currentTarget.style.borderColor = 'rgba(245,158,11,0.2)'
+              }}
+            >
               <Play size={11} /> Run
             </button>
           </motion.div>
         ))}
 
-        {/* Coming soon overlay */}
-        <div className="glass rounded-xl p-6 mt-4 text-center" style={{ border: '1px solid rgba(255,159,10,0.1)' }}>
-          <Lock size={20} className="text-text-muted mx-auto mb-2" />
-          <p className="text-xs text-text-muted">Advanced simulation engine — coming in the next release.</p>
+        {/* Coming soon card */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8,
+            padding: '24px 16px',
+            borderRadius: 9,
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-subtle)',
+            marginTop: 4,
+            textAlign: 'center',
+          }}
+        >
+          <Lock size={18} style={{ color: 'var(--text-muted)' }} />
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: 0 }}>
+            Advanced simulation engine — coming in the next release.
+          </p>
         </div>
       </motion.div>
     </div>

@@ -20,7 +20,18 @@ const useAppStore = create((set) => ({
   activeAgents: ['PlanningAgent', 'SQLToolAgent', 'GraphAgent'],
 
   // Theme
-  theme: 'dark',
+  theme: localStorage.getItem('vigilx-theme') || 'dark',
+  setTheme: (theme) => {
+    localStorage.setItem('vigilx-theme', theme)
+    document.documentElement.setAttribute('data-theme', theme)
+    set({ theme })
+  },
+  toggleTheme: () => {
+    const next = useAppStore.getState().theme === 'dark' ? 'light' : 'dark'
+    localStorage.setItem('vigilx-theme', next)
+    document.documentElement.setAttribute('data-theme', next)
+    set({ theme: next })
+  },
 }))
 
 export default useAppStore

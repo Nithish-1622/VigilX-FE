@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  AlertTriangle, Activity, Users, Shield, Clock, TrendingUp,
-  RefreshCw, Layers, CheckCircle2, ChevronRight
+  AlertTriangle, Activity, Users, Shield, Clock,
+  RefreshCw, ChevronRight,
 } from 'lucide-react'
 import CrimeCharts from './CrimeCharts'
 import NetworkMini from './NetworkMini'
@@ -14,53 +14,57 @@ const STATS = [
     icon: AlertTriangle,
     label: 'Active Incidents',
     value: '47',
-    delta: '+3 today',
-    accent: '#FF3B30',
-    subtext: '12 high priority in Harbor District'
+    delta: '+3',
+    deltaLabel: 'today',
+    accent: '#F03E3E',
+    sub: '12 high priority · Harbor District',
   },
   {
     id: 'persons',
     icon: Users,
     label: 'Tracked Persons',
     value: '1,284',
-    delta: '+18 today',
-    accent: '#00F0FF',
-    subtext: '480 connected in Neo4j graph'
+    delta: '+18',
+    deltaLabel: 'today',
+    accent: '#00D4FF',
+    sub: '480 connected in graph',
   },
   {
     id: 'queries',
     icon: Activity,
     label: 'AI Queries Today',
     value: '392',
-    delta: '+56 today',
-    accent: '#BF5AF2',
-    subtext: 'Avg execution time 1.4s'
+    delta: '+56',
+    deltaLabel: 'today',
+    accent: '#A855F7',
+    sub: 'Avg execution 1.4s',
   },
   {
     id: 'resolved',
     icon: Shield,
     label: 'Cases Resolved',
     value: '28',
-    delta: '+4 today',
-    accent: '#30D158',
-    subtext: '67.4% resolution rate'
+    delta: '+4',
+    deltaLabel: 'today',
+    accent: '#22C55E',
+    sub: '67.4% resolution rate',
   },
 ]
 
 const ALERTS = [
-  { id: 1, title: 'Gang activity spike detected', district: 'Harbor District', time: '3m ago', level: 'CRITICAL', badgeColor: '#FF3B30' },
-  { id: 2, title: 'New suspect linked to Case #4421', district: 'Downtown Sector', time: '12m ago', level: 'HIGH RISK', badgeColor: '#FF9F0A' },
-  { id: 3, title: 'Cytoscape sync complete', district: '8 new connections', time: '28m ago', level: 'INFO', badgeColor: '#00F0FF' },
-  { id: 4, title: 'V2 pipeline finished for query #8812', district: 'Multi-Agent', time: '41m ago', level: 'INFO', badgeColor: '#00F0FF' },
+  { id: 1, title: 'Gang activity spike detected', district: 'Harbor District', time: '3m ago', level: 'CRITICAL', color: '#F03E3E' },
+  { id: 2, title: 'New suspect linked to Case #4421', district: 'Downtown Sector', time: '12m ago', level: 'HIGH', color: '#F59E0B' },
+  { id: 3, title: 'Cytoscape sync complete', district: '8 new connections', time: '28m ago', level: 'INFO', color: '#00D4FF' },
+  { id: 4, title: 'V2 pipeline finished for query #8812', district: 'Multi-Agent', time: '41m ago', level: 'INFO', color: '#00D4FF' },
 ]
 
 const FLEET_AGENTS = [
-  { name: 'PlanningAgent', role: 'Orchestrator', status: 'active', tasks: 3, color: '#BF5AF2' },
-  { name: 'SQLToolAgent', role: 'Database Retrieval', status: 'active', tasks: 7, color: '#00F0FF' },
-  { name: 'GraphAgent', role: 'Network Analysis', status: 'active', tasks: 4, color: '#30D158' },
-  { name: 'TimelineAgent', role: 'Temporal Mapping', status: 'idle', tasks: 0, color: '#FF9F0A' },
-  { name: 'CriticAgent', role: 'Fact Verification', status: 'active', tasks: 2, color: '#FF3B30' },
-  { name: 'GeoAgent', role: 'Spatial Clustering', status: 'active', tasks: 1, color: '#00F0FF' },
+  { name: 'Planning', role: 'Orchestrator', status: 'active', color: '#A855F7' },
+  { name: 'SQLTool', role: 'DB Retrieval', status: 'active', color: '#00D4FF' },
+  { name: 'Graph', role: 'Network Analysis', status: 'active', color: '#22C55E' },
+  { name: 'Timeline', role: 'Temporal', status: 'idle', color: '#F59E0B' },
+  { name: 'Critic', role: 'Validation', status: 'active', color: '#F03E3E' },
+  { name: 'Geo', role: 'Spatial', status: 'active', color: '#00D4FF' },
 ]
 
 export default function Home() {
@@ -72,114 +76,264 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* ── Dashboard Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-[#21262D]/60">
+      {/* Page header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 16,
+          paddingBottom: 16,
+          borderBottom: '1px solid var(--border-subtle)',
+        }}
+      >
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">Intelligence Dashboard</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/20 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00F0FF] animate-pulse" />
-              Live Operations
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+              Intelligence Dashboard
+            </h1>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                padding: '2px 8px',
+                borderRadius: 20,
+                fontSize: 11,
+                fontWeight: 500,
+                background: 'rgba(34,197,94,0.08)',
+                border: '1px solid rgba(34,197,94,0.15)',
+                color: '#22C55E',
+              }}
+            >
+              <span
+                style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  background: '#22C55E',
+                  animation: 'pulseDot 2s ease-in-out infinite',
+                }}
+              />
+              Live
             </span>
           </div>
-          <p className="text-xs text-[#8B949E] mt-1">
-            Real-time multi-agent criminal analytics · Jurisdiction: Metropolitan Police HQ
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0 }}>
+            Real-time criminal analytics · Metropolitan Police HQ
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#161B22] border border-[#30363D] text-xs text-[#8B949E]">
-            <Clock size={13} className="text-[#00F0FF]" />
-            <span>Updated: Thursday, 24 July 2026</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '5px 10px',
+              borderRadius: 6,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              fontSize: 11,
+              color: 'var(--text-secondary)',
+            }}
+          >
+            <Clock size={12} style={{ color: 'var(--accent-cyan)' }} />
+            Thu, 24 Jul 2026
           </div>
           <button
             onClick={triggerRefresh}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161B22] hover:bg-[#21262D] border border-[#30363D] text-xs text-white transition-colors"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '5px 12px',
+              borderRadius: 6,
+              fontSize: 12,
+              fontWeight: 500,
+              color: 'var(--text-secondary)',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--text-primary)'
+              e.currentTarget.style.borderColor = 'var(--border-active)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--text-secondary)'
+              e.currentTarget.style.borderColor = 'var(--border-subtle)'
+            }}
           >
-            <RefreshCw size={13} className={refreshing ? 'animate-spin text-[#00F0FF]' : 'text-[#8B949E]'} />
+            <RefreshCw
+              size={13}
+              style={{
+                color: refreshing ? 'var(--accent-cyan)' : 'inherit',
+                animation: refreshing ? 'spin 0.8s linear infinite' : 'none',
+              }}
+            />
             Sync Feeds
           </button>
         </div>
       </div>
 
-      {/* ── Key Metrics Cards Row ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
         {STATS.map((s, i) => (
           <motion.div
             key={s.id}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className="glass rounded-xl p-4 hover:border-[#30363D] transition-all cursor-default"
-            style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+            transition={{ delay: i * 0.05, duration: 0.2 }}
+            style={{
+              padding: '14px 16px',
+              borderRadius: 9,
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-subtle)',
+              cursor: 'default',
+              transition: 'border-color 0.15s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-active)')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-subtle)')}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[#8B949E] uppercase tracking-wider">{s.label}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <span className="section-label">{s.label}</span>
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ background: `${s.accent}15`, border: `1px solid ${s.accent}30` }}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 7,
+                  background: `${s.accent}10`,
+                  border: `1px solid ${s.accent}20`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <s.icon size={16} style={{ color: s.accent }} />
+                <s.icon size={13} style={{ color: s.accent }} />
               </div>
             </div>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-black text-white tracking-tight">{s.value}</span>
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#161B22] text-white/90 border border-[#30363D]">
-                {s.delta}
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>
+                {s.value}
+              </span>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  color: s.accent,
+                  background: `${s.accent}10`,
+                  padding: '1px 6px',
+                  borderRadius: 4,
+                }}
+              >
+                {s.delta} {s.deltaLabel}
               </span>
             </div>
-            <p className="text-[11px] text-[#484F58] mt-2 truncate">{s.subtext}</p>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{s.sub}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* ── Row 1: Crime Analytics & Live Alerts (Equal Height Grid) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-8 flex flex-col">
+      {/* Charts row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16, alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <CrimeCharts />
         </div>
-        <div className="lg:col-span-4 flex flex-col">
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <LiveAlertsCard alerts={ALERTS} />
         </div>
       </div>
 
-      {/* ── Row 2: Criminal Network Graph & Geospatial Map (Equal Height Grid) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-6 flex flex-col">
+      {/* Graph + Map row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <NetworkMini />
         </div>
-        <div className="lg:col-span-6 flex flex-col">
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           <HotspotMap />
         </div>
       </div>
 
-      {/* ── Row 3: Agent Fleet Status Banner ── */}
-      <div className="glass rounded-xl p-4 border border-[#21262D]">
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-[#21262D]">
-          <div className="flex items-center gap-2">
-            <Activity size={16} className="text-[#BF5AF2]" />
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">Multi-Agent Fleet Status</h3>
-            <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/20">
-              {FLEET_AGENTS.filter((a) => a.status === 'active').length} / {FLEET_AGENTS.length} Active
+      {/* Agent fleet */}
+      <div
+        style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 9,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: '1px solid var(--border-subtle)',
+            background: 'var(--bg-tertiary)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Activity size={14} style={{ color: 'var(--accent-purple)' }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Agent Fleet
+            </span>
+            <span className="tag-cyan">
+              {FLEET_AGENTS.filter((a) => a.status === 'active').length}/{FLEET_AGENTS.length} active
             </span>
           </div>
-          <span className="text-[11px] text-[#8B949E]">Avg Latency: <strong className="text-white font-mono">140ms</strong></span>
+          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+            Avg latency{' '}
+            <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace', fontWeight: 500 }}>
+              140ms
+            </strong>
+          </span>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(6, 1fr)',
+            gap: 1,
+            background: 'var(--border-subtle)',
+          }}
+        >
           {FLEET_AGENTS.map((agent) => (
             <div
               key={agent.name}
-              className="p-2.5 rounded-lg bg-[#161B22]/60 border border-[#21262D] flex flex-col justify-between"
+              style={{
+                padding: '12px 14px',
+                background: 'var(--bg-secondary)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span className="w-2 h-2 rounded-full" style={{ background: agent.color, boxShadow: `0 0 8px ${agent.color}` }} />
-                <span className="text-[9px] font-semibold uppercase text-[#8B949E]">{agent.status}</span>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span
+                  style={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: agent.status === 'active' ? agent.color : 'var(--text-muted)',
+                    boxShadow: agent.status === 'active' ? `0 0 0 2px ${agent.color}25` : 'none',
+                    display: 'inline-block',
+                  }}
+                />
+                <span
+                  className="section-label"
+                  style={{ color: agent.status === 'active' ? agent.color : 'var(--text-muted)' }}
+                >
+                  {agent.status}
+                </span>
               </div>
-              <p className="text-xs font-bold text-white truncate">{agent.name.replace('Agent', '')}</p>
-              <p className="text-[10px] text-[#484F58] mt-0.5 truncate">{agent.role}</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                {agent.name}
+              </p>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{agent.role}</p>
             </div>
           ))}
         </div>
@@ -191,38 +345,114 @@ export default function Home() {
 
 function LiveAlertsCard({ alerts }) {
   return (
-    <div className="glass rounded-xl border border-[#21262D] overflow-hidden flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#21262D] bg-[#161B22]/50">
-        <div className="flex items-center gap-2">
-          <AlertTriangle size={15} className="text-[#FF3B30]" />
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">Live Intel Alerts</h3>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border-subtle)',
+        borderRadius: 9,
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '12px 16px',
+          borderBottom: '1px solid var(--border-subtle)',
+          background: 'var(--bg-tertiary)',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <AlertTriangle size={14} style={{ color: '#F03E3E' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Live Alerts</span>
         </div>
-        <span className="w-2 h-2 rounded-full bg-[#FF3B30] animate-ping" />
+        <span
+          style={{
+            width: 7,
+            height: 7,
+            borderRadius: '50%',
+            background: '#F03E3E',
+            display: 'inline-block',
+            animation: 'pulseDot 1.5s ease-in-out infinite',
+          }}
+        />
       </div>
 
-      <div className="divide-y divide-[#21262D]/60 flex-1 overflow-y-auto max-h-[360px]">
-        {alerts.map((a) => (
-          <div key={a.id} className="p-3.5 hover:bg-white/[0.02] transition-colors cursor-pointer">
-            <div className="flex items-center justify-between mb-1">
+      <div style={{ flex: 1, overflowY: 'auto' }}>
+        {alerts.map((a, i) => (
+          <div
+            key={a.id}
+            style={{
+              padding: '11px 16px',
+              borderBottom: i < alerts.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+              cursor: 'pointer',
+              transition: 'background 0.1s',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-tertiary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
               <span
-                className="text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase"
-                style={{ background: `${a.badgeColor}15`, color: a.badgeColor, border: `1px solid ${a.badgeColor}30` }}
+                style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  padding: '1px 6px',
+                  borderRadius: 3,
+                  background: `${a.color}10`,
+                  color: a.color,
+                  border: `1px solid ${a.color}20`,
+                  letterSpacing: '0.04em',
+                }}
               >
                 {a.level}
               </span>
-              <span className="text-[10px] text-[#484F58] flex items-center gap-1">
-                <Clock size={10} /> {a.time}
+              <span
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 10,
+                  color: 'var(--text-muted)',
+                }}
+              >
+                <Clock size={9} /> {a.time}
               </span>
             </div>
-            <p className="text-xs font-semibold text-white leading-snug">{a.title}</p>
-            <p className="text-[11px] text-[#8B949E] mt-1">{a.district}</p>
+            <p style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)', margin: '0 0 2px', lineHeight: 1.4 }}>
+              {a.title}
+            </p>
+            <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: 0 }}>{a.district}</p>
           </div>
         ))}
       </div>
 
-      <div className="p-3 border-t border-[#21262D] bg-[#161B22]/30">
-        <button className="text-xs font-semibold text-[#00F0FF] hover:underline flex items-center gap-1">
-          View All Live Alerts <ChevronRight size={12} />
+      <div
+        style={{
+          padding: '10px 16px',
+          borderTop: '1px solid var(--border-subtle)',
+          flexShrink: 0,
+        }}
+      >
+        <button
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            fontSize: 12,
+            fontWeight: 500,
+            color: 'var(--accent-cyan)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          View all alerts <ChevronRight size={13} />
         </button>
       </div>
     </div>
