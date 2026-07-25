@@ -9,13 +9,13 @@ export default function ForgotPassword() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const { forgotPassword, loading, error, clearError } = useAuthStore()
+  const { forgotPassword, error, clearError } = useAuthStore()
 
-  // Pre-fill email from query param if navigated from login page
   const initialEmail = new URLSearchParams(location.search).get('email') || ''
   const [email, setEmail] = useState(initialEmail)
   const [sent, setSent] = useState(false)
   const [localError, setLocalError] = useState('')
+  const [formLoading, setFormLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -24,7 +24,9 @@ export default function ForgotPassword() {
 
     if (!email) { setLocalError('Please enter your email address.'); return }
 
+    setFormLoading(true)
     const res = await forgotPassword(email)
+    setFormLoading(false)
     if (res.success) {
       setSent(true)
     } else {

@@ -21,10 +21,6 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
-      '/auth': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-      },
       
       // ── FastAPI AI Engine (Port 8001): Multi-Agent AI, Graph Intelligence ──
       '/api/fastapi': {

@@ -55,7 +55,7 @@ export default function Login() {
   const location = useLocation()
   const from = location.state?.from?.pathname || '/app/home'
 
-  const { login, loginWithGoogle, loginWithZoho, signUp, loading, error, clearError } = useAuthStore()
+  const { login, loginWithGoogle, loginWithZoho, signUp, error, clearError } = useAuthStore()
 
   const [mode, setMode] = useState('login')       // 'login' | 'signup' | 'forgot'
   const [email, setEmail] = useState('')
@@ -67,7 +67,8 @@ export default function Login() {
   const [rememberMe, setRememberMe] = useState(true)
   const [successMsg, setSuccessMsg] = useState('')
   const [localError, setLocalError] = useState('')
-  const [oauthLoading, setOAuthLoading] = useState(null)
+  const [oauthLoading, setOAuthLoading] = useState(null)   // 'google' | 'zoho' | null
+  const [formLoading, setFormLoading] = useState(false)    // only true while a form action is in-flight
   const [providers, setProviders] = useState(['email', 'google', 'zoho'])
 
   // Load enabled providers from backend dynamically
@@ -94,7 +95,9 @@ export default function Login() {
     clearError()
     if (!email || !password) { setLocalError('Please enter both email and password.'); return }
 
+    setFormLoading(true)
     const res = await login(email, password)
+    setFormLoading(false)
     if (res.success) navigate(from, { replace: true })
   }
 
@@ -107,7 +110,9 @@ export default function Login() {
     if (password !== confirmPassword) { setLocalError('Passwords do not match.'); return }
     if (password.length < 8) { setLocalError('Password must be at least 8 characters.'); return }
 
+    setFormLoading(true)
     const res = await signUp(email, password, firstName, lastName)
+    setFormLoading(false)
     if (res.success) {
       setSuccessMsg('Account registered! Check your email for a verification link before signing in.')
       setMode('login')
@@ -222,9 +227,9 @@ export default function Login() {
             </div>
             <form onSubmit={handleForgotSubmit}>
               <AuthInput label="Official Email Address" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="officer@agency.gov" icon={Mail} />
-              <button type="submit" disabled={loading}
-                style={{ width: '100%', height: 44, background: 'linear-gradient(135deg, #00C8F0, #8B5CF6)', border: 'none', borderRadius: 8, color: '#FFF', fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16, boxShadow: '0 0 22px rgba(0, 200, 240, 0.35)', transition: 'all 0.2s' }}>
-                {loading ? <><Loader2 size={14} className="animate-spin" /> SENDING RESET LINK...</> : <><KeyRound size={14} /> SEND RESET LINK</>}
+              <button type="submit" disabled={formLoading}
+                style={{ width: '100%', height: 44, background: 'linear-gradient(135deg, #00C8F0, #8B5CF6)', border: 'none', borderRadius: 8, color: '#FFF', fontSize: 12, fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.08em', cursor: formLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16, boxShadow: '0 0 22px rgba(0, 200, 240, 0.35)', transition: 'all 0.2s' }}>
+                {formLoading ? <><Loader2 size={14} className="animate-spin" /> SENDING RESET LINK...</> : <><KeyRound size={14} /> SEND RESET LINK</>}
               </button>
             </form>
             <button onClick={() => { setMode('login'); setLocalError(''); clearError() }}
@@ -245,7 +250,7 @@ export default function Login() {
                     label={oauthLoading === 'google' ? 'Redirecting...' : 'Google'}
                     icon={oauthLoading === 'google' ? <Loader2 size={16} className="animate-spin" /> : <GoogleSVG />}
                     onClick={handleGoogleSignIn}
-                    disabled={loading || !!oauthLoading}
+                    disabled={formLoading || !!oauthLoading}
                     hoverColor="#4285F4"
                   />
                 )}
@@ -254,7 +259,7 @@ export default function Login() {
                     label={oauthLoading === 'zoho' ? 'Redirecting...' : 'Zoho'}
                     icon={oauthLoading === 'zoho' ? <Loader2 size={16} className="animate-spin" /> : <ZohoIcon />}
                     onClick={handleZohoSignIn}
-                    disabled={loading || !!oauthLoading}
+                    disabled={formLoading || !!oauthLoading}
                     hoverColor="#E42527"
                   />
                 )}
@@ -300,7 +305,7 @@ export default function Login() {
                   <label htmlFor="remember" style={{ fontSize: 12, color: '#94A3B8', cursor: 'pointer' }}>Remember officer session</label>
                 </div>
 
-                <PrimaryButton type="submit" loading={loading} loadingText="AUTHENTICATING..." text="AUTHENTICATE & ENTER PORTAL" />
+                <PrimaryButton type="submit" loading={formLoading} loadingText="AUTHENTICATING..." text="AUTHENTICATE & ENTER PORTAL" />
               </form>
             )}
           </motion.div>
@@ -330,7 +335,7 @@ export default function Login() {
               <AuthInput label="Confirm Password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="••••••••••••" icon={Lock} />
 
               <div style={{ marginTop: 4 }}>
-                <PrimaryButton type="submit" loading={loading} loadingText="REGISTERING CLEARANCE..." text="REGISTER OFFICER ACCOUNT" />
+                <PrimaryButton type="submit" loading={formLoading} loadingText="REGISTERING CLEARANCE..." text="REGISTER OFFICER ACCOUNT" />
               </div>
             </form>
           </motion.div>
