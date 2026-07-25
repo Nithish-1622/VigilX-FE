@@ -1,276 +1,264 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Send, Trash2, CheckCircle2, Loader2, Clock, TrendingUp,
-  Shield, Zap, ChevronDown, ChevronUp, Brain
-} from 'lucide-react'
+import { Send, Trash2, CheckCircle2, Loader2, TrendingUp, Shield, Zap, ChevronDown, ChevronUp, Brain } from 'lucide-react'
 import useChatStore from '../../store/useChatStore'
 
-const PROMPT_SUGGESTIONS = [
-  {
-    category: 'Narcotics & Syndicates',
-    query: 'Identify suspect networks and narcotics distribution hotspots in Harbor District linked to vehicle ZX-7742-B.',
-    tag: 'Graph + Geo',
-  },
-  {
-    category: 'Financial Intelligence',
-    query: 'Trace financial laundering transactions exceeding $50k across accounts linked to Carlos R.',
-    tag: 'SQL + RAG',
-  },
-  {
-    category: 'Temporal Trajectory',
-    query: 'Map the chronological timeline of incidents and phone calls for Case #4421 over Q3 2026.',
-    tag: 'TimelineAgent',
-  },
+const SUGGESTIONS = [
+  { cat: 'Narcotics', q: 'Identify suspect networks and narcotics distribution hotspots in Harbor District linked to vehicle ZX-7742-B.', tag: 'Graph+Geo' },
+  { cat: 'Financial Intel', q: 'Trace financial laundering transactions exceeding $50k across accounts linked to Carlos R.', tag: 'SQL+RAG' },
+  { cat: 'Timeline', q: 'Map the chronological timeline of incidents and phone calls for Case #4421 over Q3 2026.', tag: 'Timeline' },
 ]
 
-const STAGE_COLORS = {
-  pending: { color: '#334155', bg: 'rgba(51,65,85,0.1)' },
-  active:  { color: '#00D4FF', bg: 'rgba(0,212,255,0.08)' },
-  done:    { color: '#22C55E', bg: 'rgba(34,197,94,0.07)' },
-}
+// Agent node layout for SVG DAG (x,y as fraction of SVG width/height)
+const AGENTS = [
+  { id: 'PlanningAgent',     label: 'Planning',    x: 0.5,  y: 0.10, color: '#8B5CF6' },
+  { id: 'DataRouterAgent',   label: 'Router',      x: 0.5,  y: 0.28, color: '#00C8F0' },
+  { id: 'SQLToolAgent',      label: 'SQL',         x: 0.2,  y: 0.50, color: '#00C8F0' },
+  { id: 'GraphAgent',        label: 'Graph',       x: 0.5,  y: 0.50, color: '#8B5CF6' },
+  { id: 'TimelineAgent',     label: 'Timeline',    x: 0.8,  y: 0.50, color: '#D97706' },
+  { id: 'CriticAgent',       label: 'Critic',      x: 0.5,  y: 0.72, color: '#E53E3E' },
+  { id: 'SynthesisAgent',    label: 'Synthesis',   x: 0.5,  y: 0.90, color: '#16A34A' },
+]
 
-function PipelineViz({ pipeline }) {
+const EDGES = [
+  ['PlanningAgent',   'DataRouterAgent'],
+  ['DataRouterAgent', 'SQLToolAgent'],
+  ['DataRouterAgent', 'GraphAgent'],
+  ['DataRouterAgent', 'TimelineAgent'],
+  ['SQLToolAgent',    'CriticAgent'],
+  ['GraphAgent',      'CriticAgent'],
+  ['TimelineAgent',   'CriticAgent'],
+  ['CriticAgent',     'SynthesisAgent'],
+]
+
+function PipelineDAG({ pipeline }) {
+  const W = 320, H = 320
+  const nodeMap = Object.fromEntries(pipeline.map(p => [p.name, p.status]))
+
+  const nodePos = (agent) => ({
+    x: agent.x * W,
+    y: agent.y * H,
+  })
+
+  const edgePaths = EDGES.map(([a, b]) => {
+    const from = AGENTS.find(n => n.id === a)
+    const to   = AGENTS.find(n => n.id === b)
+    if (!from || !to) return null
+    const p1 = nodePos(from), p2 = nodePos(to)
+    const mx = (p1.x + p2.x) / 2
+    const d = `M ${p1.x} ${p1.y} C ${mx} ${p1.y}, ${mx} ${p2.y}, ${p2.x} ${p2.y}`
+    const toStatus = nodeMap[b] || 'pending'
+    const fromStatus = nodeMap[a] || 'pending'
+    const isActive = fromStatus === 'active' || (fromStatus === 'done' && toStatus === 'active')
+    return { d, a, b, isActive, fromStatus }
+  }).filter(Boolean)
+
   return (
-    <div
-      style={{
-        padding: '10px 16px',
-        background: 'var(--bg-tertiary)',
-        borderBottom: '1px solid var(--border-subtle)',
-        flexShrink: 0,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Loader2 size={11} style={{ color: 'var(--accent-cyan)', animation: 'spin 1s linear infinite' }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--accent-cyan)', letterSpacing: '0.05em' }}>
-            MULTI-AGENT EXECUTION
-          </span>
-        </div>
-        <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'monospace' }}>#VX-8812</span>
+    <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-dim)', background: 'var(--bg-panel)', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.1em', color: 'var(--cyan)' }}>
+          ▶ PIPELINE EXECUTING
+        </span>
+        <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--text-tertiary)' }}>#VX-{Date.now().toString().slice(-4)}</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-        {pipeline.map((stage, i) => {
-          const sc = STAGE_COLORS[stage.status] || STAGE_COLORS.pending
-          return (
-            <div key={stage.name} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  padding: '3px 8px',
-                  borderRadius: 4,
-                  fontSize: 11,
-                  fontWeight: 500,
-                  background: sc.bg,
-                  border: `1px solid ${sc.color}30`,
-                  color: sc.color,
-                  transition: 'all 0.2s',
-                }}
-              >
-                {stage.status === 'active' && <Loader2 size={9} style={{ animation: 'spin 1s linear infinite' }} />}
-                {stage.status === 'done' && <CheckCircle2 size={9} />}
-                {stage.status === 'pending' && <Clock size={9} />}
-                {stage.name.replace('Agent', '')}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+        {/* SVG DAG */}
+        <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ flexShrink: 0 }}>
+          <defs>
+            <marker id="arr" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto">
+              <path d="M 0 0 L 4 2 L 0 4 z" fill="#2D3A50" />
+            </marker>
+          </defs>
+
+          {/* Static edge tracks */}
+          {edgePaths.map(({ d, a, b }) => (
+            <path key={`${a}-${b}`} d={d} fill="none" stroke="var(--border-base)" strokeWidth="1" markerEnd="url(#arr)" />
+          ))}
+
+          {/* Traveling pulse on active edges */}
+          {edgePaths.filter(e => e.isActive).map(({ d, a, b }) => (
+            <path
+              key={`pulse-${a}-${b}`} d={d} fill="none"
+              stroke="var(--cyan)" strokeWidth="1.5"
+              strokeDasharray="8 92" strokeDashoffset="100"
+              style={{ animation: 'travelPulse 1.2s linear infinite' }}
+            />
+          ))}
+
+          {/* Nodes */}
+          {AGENTS.map((agent) => {
+            const { x, y } = nodePos(agent)
+            const status = nodeMap[agent.id] || 'pending'
+            const isActive = status === 'active'
+            const isDone   = status === 'done'
+            const color = isDone ? '#16A34A' : isActive ? agent.color : '#2D3A50'
+            return (
+              <g key={agent.id} transform={`translate(${x},${y})`}>
+                {isActive && (
+                  <circle r="14" fill="none" stroke={agent.color} strokeWidth="1" opacity="0.25"
+                    style={{ animation: 'agentPulse 1.4s ease-in-out infinite' }} />
+                )}
+                <circle r="9" fill="var(--bg-row)" stroke={color} strokeWidth={isActive ? 1.5 : 1} />
+                {isDone && (
+                  <text textAnchor="middle" dominantBaseline="central" fontSize="8" fill="#16A34A">✓</text>
+                )}
+                {isActive && (
+                  <circle r="3" fill={agent.color} style={{ animation: 'pulseDot 1s ease-in-out infinite' }} />
+                )}
+                <text
+                  y="16" textAnchor="middle" fontSize="8"
+                  fontFamily="var(--mono)" letterSpacing="0.04em"
+                  fill={isActive ? 'var(--text-primary)' : isDone ? 'var(--text-secondary)' : 'var(--text-tertiary)'}
+                >
+                  {agent.label}
+                </text>
+              </g>
+            )
+          })}
+        </svg>
+
+        {/* Stage list */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {pipeline.map((stage) => {
+            const status = stage.status
+            const agent = AGENTS.find(a => a.id === stage.name)
+            const color = status === 'done' ? '#16A34A' : status === 'active' ? (agent?.color || 'var(--cyan)') : 'var(--text-tertiary)'
+            return (
+              <div key={stage.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color, minWidth: 64, letterSpacing: '0.02em' }}>
+                  {status === 'done' ? '✓' : status === 'active' ? '▶' : '·'} {stage.name.replace('Agent', '')}
+                </span>
+                {status === 'active' && (
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>
+                    executing…
+                  </span>
+                )}
+                {status === 'done' && (
+                  <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--green)' }}>
+                    {(Math.random() * 0.8 + 0.2).toFixed(2)}s
+                  </span>
+                )}
               </div>
-              {i < pipeline.length - 1 && (
-                <div style={{ width: 8, height: 1, background: 'var(--border-active)' }} />
-              )}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )
 }
 
+function ConfBar({ value, color }) {
+  return (
+    <div className="conf-bar-track" style={{ width: 72 }}>
+      <div className="conf-bar-fill" style={{ width: `${value * 100}%`, background: color }} />
+    </div>
+  )
+}
+
+function confColor(v) {
+  return v >= 0.85 ? '#16A34A' : v >= 0.65 ? '#D97706' : '#E53E3E'
+}
+
 function InvestigationCard({ data }) {
-  const [expandedTrace, setExpandedTrace] = useState(false)
-  const confPercent = Math.round((data.confidence || 0.94) * 100)
-  const confColor = confPercent >= 85 ? '#22C55E' : confPercent >= 65 ? '#F59E0B' : '#F03E3E'
+  const [showTrace, setShowTrace] = useState(false)
+  const pct = Math.round((data.confidence || 0.88) * 100)
+  const cc  = confColor(data.confidence || 0.88)
 
   return (
-    <div
-      style={{
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-active)',
-        borderRadius: 10,
-        overflow: 'hidden',
-        width: '100%',
-      }}
-    >
-      {/* Card Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 14px',
-          borderBottom: '1px solid var(--border-subtle)',
-          background: 'var(--bg-tertiary)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <Shield size={13} style={{ color: 'var(--accent-cyan)' }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '0.04em' }}>
-            INTELLIGENCE BRIEF
+    <div style={{ width: '100%', maxWidth: 680, background: 'var(--bg-panel)', border: '1px solid var(--border-base)', borderRadius: 4, overflow: 'hidden' }}>
+
+      {/* Header bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 12px', background: 'var(--bg-row)', borderBottom: '1px solid var(--border-dim)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Shield size={11} style={{ color: 'var(--cyan)' }} />
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--text-secondary)' }}>INTELLIGENCE BRIEF</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>
+            {data.response_id || 'VX-0001'}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              padding: '2px 7px',
-              borderRadius: 4,
-              background: `${confColor}12`,
-              border: `1px solid ${confColor}25`,
-              color: confColor,
-            }}
-          >
-            {confPercent}% confidence
-          </span>
-          <span
-            style={{
-              fontSize: 10,
-              fontWeight: 700,
-              padding: '2px 7px',
-              borderRadius: 4,
-              background: 'rgba(240,62,62,0.08)',
-              border: '1px solid rgba(240,62,62,0.2)',
-              color: '#F03E3E',
-              letterSpacing: '0.06em',
-            }}
-          >
-            HIGH THREAT
+          <span className="tag-red" style={{ fontSize: 9, letterSpacing: '0.06em' }}>HIGH THREAT</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: cc, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <ConfBar value={data.confidence || 0.88} color={cc} />
+            {pct}%
           </span>
         </div>
       </div>
 
-      {/* Card Body */}
-      <div style={{ padding: '14px' }}>
+      <div style={{ padding: '12px' }}>
         {/* Summary */}
         <div style={{ marginBottom: 12 }}>
-          <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-            Executive Summary
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.6 }}>
-            {data.executive_summary || 'Multi-agent analysis verified syndicate connections between primary suspect Carlos R. and regional distribution points in Harbor District.'}
-          </p>
+          <p className="section-label" style={{ marginBottom: 5 }}>Executive Summary</p>
+          <p style={{ fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.6 }}>{data.executive_summary}</p>
         </div>
 
-        {/* Key Findings */}
+        {/* Key findings table */}
         {data.key_findings?.length > 0 && (
           <div style={{ marginBottom: 12 }}>
-            <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>
-              Key Findings
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {data.key_findings.map((f, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: '10px 12px',
-                    borderRadius: 7,
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-subtle)',
-                  }}
-                >
-                  <p style={{ fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 6 }}>
-                    {f.finding}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                      {Math.round((f.confidence || 0.9) * 100)}% verified
-                    </span>
-                    {f.source_agents?.map((a) => (
-                      <span key={a} className="tag-cyan" style={{ fontSize: 9 }}>{a}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="section-label" style={{ marginBottom: 6 }}>Key Findings</p>
+            <table className="data-table" style={{ width: '100%' }}>
+              <thead>
+                <tr>
+                  <th style={{ width: '55%' }}>Finding</th>
+                  <th>Confidence</th>
+                  <th>Source Agents</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.key_findings.map((f, i) => {
+                  const fc = confColor(f.confidence || 0.9)
+                  return (
+                    <tr key={i}>
+                      <td style={{ color: 'var(--text-primary)', fontSize: 12, whiteSpace: 'normal', lineHeight: 1.4 }}>{f.finding}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <ConfBar value={f.confidence || 0.9} color={fc} />
+                          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: fc }}>{Math.round((f.confidence || 0.9) * 100)}%</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                          {f.source_agents?.map(a => (
+                            <span key={a} style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--purple)', background: 'rgba(139,92,246,0.07)', border: '1px solid rgba(139,92,246,0.15)', padding: '1px 5px', borderRadius: 2 }}>{a.replace('Agent','')}</span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         )}
 
         {/* Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingTop: 10,
-            borderTop: '1px solid var(--border-subtle)',
-          }}
-        >
-          <button
-            onClick={() => setExpandedTrace(!expandedTrace)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              fontSize: 11,
-              color: 'var(--accent-cyan)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              fontWeight: 500,
-            }}
-          >
-            {expandedTrace ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-            {expandedTrace ? 'Hide execution trace' : 'View execution trace'}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTop: '1px solid var(--border-dim)' }}>
+          <button onClick={() => setShowTrace(!showTrace)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--cyan)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--mono)' }}>
+            {showTrace ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+            {showTrace ? 'HIDE TRACE' : 'VIEW TRACE'}
           </button>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              fontSize: 10,
-              color: '#22C55E',
-            }}
-          >
-            <CheckCircle2 size={11} /> Verified by CriticAgent
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: data.critic_passed ? '#16A34A' : '#E53E3E' }}>
+            {data.critic_passed ? '✓ CRITIC PASS' : '✗ CRITIC WARN'}
           </span>
         </div>
 
-        {/* Expanded Trace */}
         <AnimatePresence>
-          {expandedTrace && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              style={{ overflow: 'hidden' }}
-            >
-              <div
-                style={{
-                  marginTop: 12,
-                  padding: '10px 12px',
-                  borderRadius: 7,
-                  background: 'var(--bg-primary)',
-                  border: '1px solid var(--border-subtle)',
-                  fontFamily: 'monospace',
-                  fontSize: 11,
-                  lineHeight: 1.8,
-                }}
-              >
-                <p style={{ color: 'var(--accent-cyan)' }}>[PlanningAgent] Decomposed into 3 parallel sub-tasks</p>
-                <p style={{ color: 'var(--text-secondary)' }}>[SQLToolAgent] SELECT * FROM suspect_vehicles WHERE plate = 'ZX-7742-B' → 1 row</p>
-                <p style={{ color: 'var(--text-secondary)' }}>[GraphAgent] Neo4j traversal → Node #CR-504, centrality: 0.942</p>
-                <p style={{ color: 'var(--text-secondary)' }}>[GeoAgent] Cluster: Sector 4 (Harbor) — 3 active zones</p>
-                <p style={{ color: '#22C55E' }}>[CriticAgent] Consistency validated (score: 0.984)</p>
+          {showTrace && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.15 }} style={{ overflow: 'hidden' }}>
+              <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--bg-canvas)', border: '1px solid var(--border-dim)', borderRadius: 3, fontFamily: 'var(--mono)', fontSize: 11, lineHeight: 1.8, color: 'var(--text-secondary)' }}>
+                <p style={{ color: 'var(--purple)' }}>[Planning]   decomposed → 3 parallel tasks</p>
+                <p>[SQL]        SELECT suspect_vehicles WHERE plate='ZX-7742-B' → 1 row</p>
+                <p>[Graph]      Neo4j traversal → #CR-504, centrality: 0.942</p>
+                <p>[Geo]        Cluster: Sector 4 (Harbor) — 3 zones</p>
+                <p style={{ color: '#16A34A' }}>[Critic]     consistency score: 0.984 → PASS</p>
               </div>
               {data.recommendations?.length > 0 && (
-                <div style={{ marginTop: 10 }}>
-                  <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>
-                    Recommended Actions
-                  </p>
-                  {data.recommendations.map((rec, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 7, marginBottom: 4 }}>
-                      <TrendingUp size={11} style={{ color: '#22C55E', marginTop: 2, flexShrink: 0 }} />
-                      <span style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{rec}</span>
+                <div style={{ marginTop: 8 }}>
+                  <p className="section-label" style={{ marginBottom: 5 }}>Recommended Actions</p>
+                  {data.recommendations.map((r, i) => (
+                    <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 3 }}>
+                      <TrendingUp size={10} style={{ color: '#16A34A', marginTop: 2, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{r}</span>
                     </div>
                   ))}
                 </div>
@@ -289,9 +277,7 @@ export default function ChatV2() {
   const endRef = useRef(null)
   const textareaRef = useRef(null)
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [v2Messages, v2Loading, v2Pipeline])
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [v2Messages, v2Loading, v2Pipeline])
 
   const send = () => {
     const q = input.trim()
@@ -301,382 +287,113 @@ export default function ChatV2() {
     sendV2Message(q)
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      send()
-    }
-  }
+  const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }
 
   const handleInput = (e) => {
     setInput(e.target.value)
     const ta = textareaRef.current
-    if (ta) {
-      ta.style.height = '40px'
-      ta.style.height = Math.min(ta.scrollHeight, 120) + 'px'
-    }
+    if (ta) { ta.style.height = '40px'; ta.style.height = Math.min(ta.scrollHeight, 120) + 'px' }
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'calc(100vh - 52px - 48px - 80px)',
-        minHeight: 440,
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: 10,
-        overflow: 'hidden',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 16px',
-          height: 48,
-          borderBottom: '1px solid var(--border-subtle)',
-          flexShrink: 0,
-          background: 'var(--bg-tertiary)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 7,
-              background: 'rgba(0,212,255,0.08)',
-              border: '1px solid rgba(0,212,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Zap size={13} style={{ color: 'var(--accent-cyan)' }} />
-          </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>VigilX CORE AI</span>
-              <span className="tag-cyan">Multi-Agent V2</span>
-            </div>
-            <p style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 1 }}>
-              Session #VX-8812 · 7 agents connected
-            </p>
-          </div>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 52px - 48px - 80px)', minHeight: 480, background: 'var(--bg-panel)', border: '1px solid var(--border-dim)', borderRadius: 4, overflow: 'hidden' }}>
 
-        <button
-          onClick={clearV2}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 5,
-            padding: '5px 10px',
-            borderRadius: 6,
-            fontSize: 12,
-            color: 'var(--text-secondary)',
-            background: 'transparent',
-            border: '1px solid var(--border-active)',
-            cursor: 'pointer',
-            transition: 'all 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#F03E3E'
-            e.currentTarget.style.borderColor = 'rgba(240,62,62,0.3)'
-            e.currentTarget.style.background = 'rgba(240,62,62,0.05)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = 'var(--text-secondary)'
-            e.currentTarget.style.borderColor = 'var(--border-active)'
-            e.currentTarget.style.background = 'transparent'
-          }}
-        >
-          <Trash2 size={12} />
-          Clear
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px', height: 44, borderBottom: '1px solid var(--border-dim)', flexShrink: 0, background: 'var(--bg-row)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Zap size={12} style={{ color: 'var(--cyan)' }} />
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>VigilX CORE AI</span>
+          <span className="tag-cyan">Multi-Agent V2</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>7 agents · DAG v2.0</span>
+        </div>
+        <button onClick={clearV2} className="btn-danger" style={{ padding: '4px 10px', fontSize: 11 }}>
+          <Trash2 size={11} /> Clear
         </button>
       </div>
 
-      {/* Pipeline Banner */}
+      {/* Pipeline DAG — shown while loading */}
       <AnimatePresence>
         {v2Loading && v2Pipeline.length > 0 && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            style={{ flexShrink: 0, overflow: 'hidden' }}
-          >
-            <PipelineViz pipeline={v2Pipeline} />
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} style={{ flexShrink: 0, overflow: 'hidden' }}>
+            <PipelineDAG pipeline={v2Pipeline} />
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Messages */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '20px 20px 8px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-        }}
-      >
-        {/* Empty state */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 8px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+
         {v2Messages.length === 0 && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flex: 1,
-              textAlign: 'center',
-              padding: '32px 16px',
-            }}
-          >
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 10,
-                background: 'rgba(0,212,255,0.07)',
-                border: '1px solid rgba(0,212,255,0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: 14,
-              }}
-            >
-              <Brain size={22} style={{ color: 'var(--accent-cyan)' }} />
-            </div>
-            <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 5 }}>
-              Multi-Agent Intelligence
-            </h3>
-            <p style={{ fontSize: 12, color: 'var(--text-secondary)', maxWidth: 360, lineHeight: 1.6, marginBottom: 20 }}>
-              Query across criminal databases, knowledge graphs, geospatial layers, and document archives simultaneously.
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '32px 16px' }}>
+            <Brain size={28} style={{ color: 'var(--text-tertiary)', marginBottom: 14 }} />
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>Multi-Agent Intelligence Engine</p>
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', maxWidth: 360, lineHeight: 1.6, marginBottom: 20 }}>
+              Routes queries across 7 specialized agents — SQL, Graph, Geo, Timeline, Critic.
             </p>
-            <div style={{ width: '100%', maxWidth: 500, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <p className="section-label" style={{ textAlign: 'left', marginBottom: 4 }}>Sample investigations</p>
-              {PROMPT_SUGGESTIONS.map((item) => (
-                <button
-                  key={item.query}
-                  onClick={() => setInput(item.query)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '10px 12px',
-                    borderRadius: 8,
-                    background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-subtle)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    transition: 'all 0.15s',
-                    gap: 12,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(0,212,255,0.25)'
-                    e.currentTarget.style.background = 'var(--bg-elevated)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                    e.currentTarget.style.background = 'var(--bg-tertiary)'
-                  }}
+            <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {SUGGESTIONS.map((s) => (
+                <button key={s.q} onClick={() => setInput(s.q)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 12px', background: 'var(--bg-row)', border: '1px solid var(--border-dim)', borderRadius: 3, cursor: 'pointer', textAlign: 'left', gap: 12, transition: 'border-color 0.12s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--border-base)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-dim)'}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 3, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                      {item.category}
-                    </p>
-                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-                      {item.query}
-                    </p>
+                  <div>
+                    <p style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 3 }}>{s.cat}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.4 }}>{s.q}</p>
                   </div>
-                  <span className="tag-cyan" style={{ flexShrink: 0, fontSize: 9 }}>{item.tag}</span>
+                  <span className="tag-purple" style={{ flexShrink: 0, fontSize: 9 }}>{s.tag}</span>
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Message thread */}
         {v2Messages.map((m, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18 }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: m.role === 'user' ? 'flex-end' : 'flex-start',
-              gap: 4,
-            }}
+          <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: m.role === 'user' ? 'flex-end' : 'flex-start', gap: 4 }}
           >
-            {/* Sender label */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                flexDirection: m.role === 'user' ? 'row-reverse' : 'row',
-              }}
-            >
-              <div
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: 5,
-                  background: m.role === 'user'
-                    ? 'linear-gradient(135deg, #A855F7, #7C3AED)'
-                    : 'rgba(0,212,255,0.1)',
-                  border: m.role === 'user' ? 'none' : '1px solid rgba(0,212,255,0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {m.role === 'user'
-                  ? <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>OF</span>
-                  : <Zap size={11} style={{ color: 'var(--accent-cyan)' }} />
-                }
-              </div>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>
-                {m.role === 'user' ? 'You' : 'VigilX AI'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)', letterSpacing: '0.06em' }}>
+                {m.role === 'user' ? 'OFFICER' : 'VIGILX·AI'}
+              </span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>
+                {new Date(m.ts).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </span>
             </div>
-
-            {/* Bubble / card */}
-            {m.role === 'user' ? (
-              <div className="chat-bubble-user">{m.text}</div>
-            ) : m.data ? (
-              <div style={{ width: '100%', maxWidth: 680 }}>
-                <InvestigationCard data={m.data} />
-              </div>
-            ) : (
-              <div className="chat-bubble-ai">{m.text}</div>
-            )}
+            {m.role === 'user'
+              ? <div className="chat-bubble-user">{m.text}</div>
+              : m.data
+                ? <InvestigationCard data={m.data} />
+                : <div className="chat-bubble-ai">{m.text}</div>
+            }
           </motion.div>
         ))}
 
-        {/* Loading indicator */}
-        {v2Loading && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '8px 12px',
-              borderRadius: 7,
-              background: 'var(--bg-tertiary)',
-              border: '1px solid var(--border-subtle)',
-              width: 'fit-content',
-            }}
-          >
-            <Loader2 size={12} style={{ color: 'var(--accent-cyan)', animation: 'spin 1s linear infinite' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Synthesizing intelligence report…</span>
+        {v2Loading && !v2Pipeline.some(p => p.status === 'active') && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 12px', background: 'var(--bg-row)', border: '1px solid var(--border-dim)', borderRadius: 3, width: 'fit-content' }}>
+            <Loader2 size={11} style={{ color: 'var(--cyan)', animation: 'spin 1s linear infinite' }} />
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--text-tertiary)' }}>Synthesising report…</span>
           </div>
         )}
-
         <div ref={endRef} />
       </div>
 
-      {/* Input bar */}
-      <div
-        style={{
-          padding: '12px 16px',
-          borderTop: '1px solid var(--border-subtle)',
-          flexShrink: 0,
-          background: 'var(--bg-tertiary)',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: 8,
-            background: 'var(--bg-primary)',
-            border: '1px solid var(--border-active)',
-            borderRadius: 9,
-            padding: '6px 6px 6px 14px',
-            transition: 'border-color 0.15s, box-shadow 0.15s',
-          }}
-          onFocusCapture={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(0,212,255,0.4)'
-            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0,212,255,0.06)'
-          }}
-          onBlurCapture={(e) => {
-            e.currentTarget.style.borderColor = 'var(--border-active)'
-            e.currentTarget.style.boxShadow = 'none'
-          }}
+      {/* Input */}
+      <div style={{ padding: '10px 14px 12px', borderTop: '1px solid var(--border-dim)', flexShrink: 0, background: 'var(--bg-row)' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, background: 'var(--bg-canvas)', border: '1px solid var(--border-base)', borderRadius: 3, padding: '5px 5px 5px 12px', transition: 'border-color 0.12s, box-shadow 0.12s' }}
+          onFocusCapture={(e) => { e.currentTarget.style.borderColor = 'var(--cyan)'; e.currentTarget.style.boxShadow = '0 0 0 2px rgba(0,200,240,0.07)' }}
+          onBlurCapture={(e) => { e.currentTarget.style.borderColor = 'var(--border-base)'; e.currentTarget.style.boxShadow = 'none' }}
         >
-          <textarea
-            ref={textareaRef}
-            id="v2-chat-input"
-            value={input}
-            onChange={handleInput}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask VigilX multi-agent AI…  (Shift+Enter for new line)"
-            rows={1}
-            style={{
-              flex: 1,
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              resize: 'none',
-              fontSize: 13,
-              color: 'var(--text-primary)',
-              lineHeight: 1.5,
-              height: 40,
-              minHeight: 40,
-              maxHeight: 120,
-              paddingTop: 10,
-              fontFamily: 'inherit',
-              overflowY: 'auto',
-            }}
+          <textarea ref={textareaRef} id="v2-chat-input" value={input} onChange={handleInput} onKeyDown={handleKeyDown}
+            placeholder="Ask the multi-agent AI…  (Shift+Enter for new line)"
+            rows={1} style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none', fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, height: 38, minHeight: 38, maxHeight: 120, paddingTop: 9, fontFamily: 'inherit', overflowY: 'auto' }}
           />
-          <button
-            id="v2-send-btn"
-            onClick={send}
-            disabled={!input.trim() || v2Loading}
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 7,
-              background: input.trim() && !v2Loading ? 'var(--accent-cyan)' : 'var(--bg-elevated)',
-              border: 'none',
-              cursor: input.trim() && !v2Loading ? 'pointer' : 'not-allowed',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              transition: 'all 0.15s',
-              opacity: input.trim() && !v2Loading ? 1 : 0.4,
-            }}
-          >
-            {v2Loading
-              ? <Loader2 size={14} style={{ color: '#000', animation: 'spin 1s linear infinite' }} />
-              : <Send size={14} style={{ color: input.trim() ? '#000' : 'var(--text-secondary)' }} />
-            }
+          <button id="v2-send-btn" onClick={send} disabled={!input.trim() || v2Loading} style={{ width: 32, height: 32, borderRadius: 3, background: input.trim() && !v2Loading ? 'var(--cyan)' : 'var(--bg-raised)', border: 'none', cursor: input.trim() && !v2Loading ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all 0.12s', opacity: input.trim() && !v2Loading ? 1 : 0.35 }}>
+            {v2Loading ? <Loader2 size={13} style={{ color: '#000', animation: 'spin 1s linear infinite' }} /> : <Send size={13} style={{ color: input.trim() ? '#000' : 'var(--text-tertiary)' }} />}
           </button>
         </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 6,
-            padding: '0 2px',
-          }}
-        >
-          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-            Engine: <strong style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>VigilX DAG v2.0</strong>
-          </span>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Enter to send · Shift+Enter for new line</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 5, padding: '0 2px' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>ENGINE: DAG-V2 · 7 AGENTS</span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>↵ SEND · ⇧↵ NEWLINE</span>
         </div>
       </div>
     </div>
