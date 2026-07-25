@@ -12,6 +12,8 @@
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
+    "@splinetool/react-spline": "^4.1.0",
+    "@zcatalyst/auth-client": "^0.0.3",
     "axios": "^1.18.1",
     "cytoscape": "^3.34.0",
     "cytoscape-fcose": "^2.2.0",

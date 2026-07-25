@@ -64,11 +64,17 @@ export default function NetworkMini() {
 
   const nodeMap = Object.fromEntries(GRAPH_DATA.nodes.map(n => [n.id, n]))
 
-  const onWheel = (e) => {
-    e.preventDefault()
-    const factor = e.deltaY < 0 ? 1.12 : 0.88
-    setTransform(t => ({ ...t, k: Math.min(3, Math.max(0.4, t.k * factor)) }))
-  }
+  useEffect(() => {
+    const el = svgRef.current
+    if (!el) return
+    const handleWheel = (e) => {
+      e.preventDefault()
+      const factor = e.deltaY < 0 ? 1.12 : 0.88
+      setTransform(t => ({ ...t, k: Math.min(3, Math.max(0.4, t.k * factor)) }))
+    }
+    el.addEventListener('wheel', handleWheel, { passive: false })
+    return () => el.removeEventListener('wheel', handleWheel)
+  }, [])
 
   const onMouseDown = (e) => {
     if (e.target.closest('.graph-node')) return
@@ -118,7 +124,6 @@ export default function NetworkMini() {
       >
         <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%" height="100%"
           style={{ display: 'block', userSelect: 'none' }}
-          onWheel={onWheel}
         >
           <defs>
             <marker id="arr-conf" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">

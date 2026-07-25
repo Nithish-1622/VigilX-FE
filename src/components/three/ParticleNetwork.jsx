@@ -1,198 +1,188 @@
-import { useRef, useMemo, useEffect } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { InstancedMesh, Object3D, Vector3, Color, FogExp2 } from 'three'
-import * as THREE from 'three'
-
-const PARTICLE_COUNT = 320
-const CONNECTION_DIST = 0.38
-const REPULSION_DIST = 0.55
-const SPEED = 0.00018
-
-function createSimplex() {
-  // Minimal 3D value noise via hash
-  const hash = (n) => {
-    let x = Math.sin(n) * 43758.5453123
-    return x - Math.floor(x)
-  }
-  return (x, y, z) => {
-    const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z)
-    const xf = x - xi, yf = y - yi, zf = z - zi
-    const u = xf * xf * (3 - 2 * xf)
-    const v = yf * yf * (3 - 2 * yf)
-    const w = zf * zf * (3 - 2 * zf)
-    const a = hash(xi + yi * 57 + zi * 113)
-    const b = hash(xi + 1 + yi * 57 + zi * 113)
-    const c = hash(xi + (yi + 1) * 57 + zi * 113)
-    const d = hash(xi + 1 + (yi + 1) * 57 + zi * 113)
-    const e = hash(xi + yi * 57 + (zi + 1) * 113)
-    const f = hash(xi + 1 + yi * 57 + (zi + 1) * 113)
-    const g = hash(xi + (yi + 1) * 57 + (zi + 1) * 113)
-    const h = hash(xi + 1 + (yi + 1) * 57 + (zi + 1) * 113)
-    return a + (b - a) * u + (c - a) * v + (d - b - c + a) * u * v +
-      ((e - a) + (a - b - e + f) * u + (a - c - e + g) * v +
-        (b + c + e - a - d - f - g + h) * u * v) * w
-  }
-}
-
-const noise = createSimplex()
-
-function Particles({ mouse }) {
-  const meshRef = useRef()
-  const linesRef = useRef()
-  const { scene } = useThree()
-  const dummy = useMemo(() => new Object3D(), [])
-  const colorObj = useMemo(() => new Color(), [])
-  const t = useRef(0)
-
-  // Particle state
-  const particles = useMemo(() => {
-    return Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-      pos: new Vector3(
-        (Math.random() - 0.5) * 4.2,
-        (Math.random() - 0.5) * 2.8,
-        (Math.random() - 0.5) * 1.4
-      ),
-      vel: new Vector3(
-        (Math.random() - 0.5) * SPEED * 2,
-        (Math.random() - 0.5) * SPEED * 2,
-        (Math.random() - 0.5) * SPEED * 0.5
-      ),
-      noiseOffset: Math.random() * 100,
-      baseSize: 0.003 + Math.random() * 0.006,
-    }))
-  }, [])
-
-  // Lines geometry
-  const lineGeom = useMemo(() => new THREE.BufferGeometry(), [])
-  const lineMat = useMemo(() => new THREE.LineBasicMaterial({
-    color: 0x00c8f0,
-    transparent: true,
-    opacity: 0.12,
-    vertexColors: false,
-  }), [])
-
-  const maxLines = PARTICLE_COUNT * 4
-  const linePositions = useMemo(() => new Float32Array(maxLines * 2 * 3), [])
-
-  useEffect(() => {
-    if (scene) {
-      scene.fog = new FogExp2(0x080a0e, 0.28)
-    }
-  }, [scene])
-
-  useFrame((state) => {
-    if (!meshRef.current) return
-    t.current += 0.001
-    const time = t.current
-    const mx = mouse.current.x * 1.2
-    const my = mouse.current.y * 0.8
-
-    let lineIdx = 0
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const p = particles[i]
-
-      // Noise drift
-      const nx = noise(p.pos.x * 0.4 + time * 0.3 + p.noiseOffset, p.pos.y * 0.4, p.pos.z * 0.4)
-      const ny = noise(p.pos.x * 0.4, p.pos.y * 0.4 + time * 0.3 + p.noiseOffset + 10, p.pos.z * 0.4)
-      p.vel.x += (nx - 0.5) * SPEED * 0.4
-      p.vel.y += (ny - 0.5) * SPEED * 0.4
-      p.vel.multiplyScalar(0.985)
-
-      // Mouse repulsion
-      const dx = p.pos.x - mx, dy = p.pos.y - my
-      const md = Math.sqrt(dx * dx + dy * dy)
-      if (md < REPULSION_DIST && md > 0.001) {
-        const force = (REPULSION_DIST - md) / REPULSION_DIST * 0.0008
-        p.vel.x += (dx / md) * force
-        p.vel.y += (dy / md) * force
-      }
-
-      p.pos.addScaledVector(p.vel, 1)
-
-      // Wrap
-      if (p.pos.x > 2.2) p.pos.x = -2.2
-      if (p.pos.x < -2.2) p.pos.x = 2.2
-      if (p.pos.y > 1.5) p.pos.y = -1.5
-      if (p.pos.y < -1.5) p.pos.y = 1.5
-
-      dummy.position.copy(p.pos)
-      const s = p.baseSize * (1 + Math.sin(time * 1.8 + p.noiseOffset) * 0.15)
-      dummy.scale.setScalar(s * 180)
-      dummy.updateMatrix()
-      meshRef.current.setMatrixAt(i, dummy.matrix)
-
-      // Connections
-      for (let j = i + 1; j < PARTICLE_COUNT; j++) {
-        if (lineIdx >= maxLines - 2) break
-        const q = particles[j]
-        const dist = p.pos.distanceTo(q.pos)
-        if (dist < CONNECTION_DIST) {
-          linePositions[lineIdx * 6]     = p.pos.x
-          linePositions[lineIdx * 6 + 1] = p.pos.y
-          linePositions[lineIdx * 6 + 2] = p.pos.z
-          linePositions[lineIdx * 6 + 3] = q.pos.x
-          linePositions[lineIdx * 6 + 4] = q.pos.y
-          linePositions[lineIdx * 6 + 5] = q.pos.z
-          lineIdx++
-        }
-      }
-    }
-
-    // Zero out remaining line positions
-    for (let i = lineIdx * 6; i < linePositions.length; i++) linePositions[i] = 0
-
-    lineGeom.setAttribute('position', new THREE.BufferAttribute(linePositions.slice(0, Math.max(lineIdx * 6, 6)), 3))
-    lineGeom.attributes.position.needsUpdate = true
-    if (linesRef.current) linesRef.current.geometry = lineGeom
-
-    meshRef.current.instanceMatrix.needsUpdate = true
-    // Tint active nodes cyan, idle nodes dim blue-grey
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      const bright = Math.random() < 0.003
-      colorObj.set(bright ? '#00c8f0' : '#1a2a3a')
-      meshRef.current.setColorAt(i, colorObj)
-    }
-    if (meshRef.current.instanceColor) meshRef.current.instanceColor.needsUpdate = true
-  })
-
-  return (
-    <>
-      <instancedMesh ref={meshRef} args={[null, null, PARTICLE_COUNT]} frustumCulled={false}>
-        <sphereGeometry args={[1, 4, 4]} />
-        <meshBasicMaterial vertexColors />
-      </instancedMesh>
-      <lineSegments ref={linesRef} frustumCulled={false}>
-        <bufferGeometry ref={lineGeom} />
-        <lineBasicMaterial color="#00c8f0" transparent opacity={0.1} />
-      </lineSegments>
-    </>
-  )
-}
+import { useEffect, useRef } from 'react'
 
 export default function ParticleNetwork({ style }) {
-  const mouse = useRef({ x: 0, y: 0 })
+  const canvasRef = useRef(null)
 
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    mouse.current.x = ((e.clientX - rect.left) / rect.width - 0.5) * 4.4
-    mouse.current.y = -((e.clientY - rect.top) / rect.height - 0.5) * 3.0
-  }
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    let animationFrameId
+    let width = 0
+    let height = 0
+    let dpr = 1
+
+    const mouse = { x: -1000, y: -1000, active: false }
+
+    const handleMouseMove = (e) => {
+      mouse.x = e.clientX
+      mouse.y = e.clientY
+      mouse.active = true
+    }
+
+    const handleMouseLeave = () => {
+      mouse.active = false
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseleave', handleMouseLeave)
+
+    const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      width = window.innerWidth
+      height = window.innerHeight
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      ctx.scale(dpr, dpr)
+    }
+
+    resize()
+    window.addEventListener('resize', resize)
+
+    // Particle pool setup
+    const particleCount = Math.min(Math.floor((width * height) / 9000), 160)
+    const particles = []
+
+    const colors = ['#00f0c8', '#00c8f0', '#38bdf8', '#8b5cf6', '#0284c7']
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.65,
+        vy: (Math.random() - 0.5) * 0.65,
+        radius: Math.random() * 2.2 + 1.0,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: Math.random() * 0.6 + 0.4,
+        pulseSpeed: 0.02 + Math.random() * 0.03,
+        pulseAngle: Math.random() * Math.PI * 2,
+      })
+    }
+
+    const maxDist = 140
+    const mouseRadius = 180
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height)
+
+      // Update particle positions
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i]
+
+        p.x += p.vx
+        p.y += p.vy
+
+        // Wrap around boundaries
+        if (p.x < -20) p.x = width + 20
+        if (p.x > width + 20) p.x = -20
+        if (p.y < -20) p.y = height + 20
+        if (p.y > height + 20) p.y = -20
+
+        // Pulse size & alpha
+        p.pulseAngle += p.pulseSpeed
+        const currentAlpha = p.alpha * (0.7 + Math.sin(p.pulseAngle) * 0.3)
+
+        // Mouse repulsion / interaction
+        if (mouse.active) {
+          const dx = p.x - mouse.x
+          const dy = p.y - mouse.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < mouseRadius && dist > 0) {
+            const force = (mouseRadius - dist) / mouseRadius
+            p.x += (dx / dist) * force * 2.5
+            p.y += (dy / dist) * force * 2.5
+          }
+        }
+
+        // Draw particle dot
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
+        ctx.fillStyle = p.color
+        ctx.globalAlpha = currentAlpha
+        ctx.fill()
+      }
+
+      // Draw network line connections & geometric mesh triangles
+      ctx.lineWidth = 0.9
+
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i]
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j]
+          const dx = p1.x - p2.x
+          const dy = p1.y - p2.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+
+          if (dist < maxDist) {
+            const lineAlpha = (1 - dist / maxDist) * 0.38
+            ctx.beginPath()
+            ctx.moveTo(p1.x, p1.y)
+            ctx.lineTo(p2.x, p2.y)
+            ctx.strokeStyle = `rgba(0, 240, 200, ${lineAlpha})`
+            ctx.globalAlpha = lineAlpha
+            ctx.stroke()
+
+            // Connect third nearby node to form geometric mesh triangle
+            for (let k = j + 1; k < particles.length; k++) {
+              const p3 = particles[k]
+              const d2 = Math.hypot(p2.x - p3.x, p2.y - p3.y)
+              const d3 = Math.hypot(p1.x - p3.x, p1.y - p3.y)
+
+              if (d2 < maxDist && d3 < maxDist) {
+                const triAlpha = (1 - (dist + d2 + d3) / (maxDist * 3)) * 0.08
+                ctx.beginPath()
+                ctx.moveTo(p1.x, p1.y)
+                ctx.lineTo(p2.x, p2.y)
+                ctx.lineTo(p3.x, p3.y)
+                ctx.closePath()
+                ctx.fillStyle = `rgba(0, 200, 240, ${triAlpha})`
+                ctx.globalAlpha = triAlpha
+                ctx.fill()
+                break
+              }
+            }
+          }
+        }
+
+        // Draw line connections to cursor when mouse is active
+        if (mouse.active) {
+          const mdx = p1.x - mouse.x
+          const mdy = p1.y - mouse.y
+          const mdist = Math.sqrt(mdx * mdx + mdy * mdy)
+          if (mdist < mouseRadius) {
+            const mAlpha = (1 - mdist / mouseRadius) * 0.45
+            ctx.beginPath()
+            ctx.moveTo(p1.x, p1.y)
+            ctx.lineTo(mouse.x, mouse.y)
+            ctx.strokeStyle = `rgba(0, 200, 240, ${mAlpha})`
+            ctx.globalAlpha = mAlpha
+            ctx.stroke()
+          }
+        }
+      }
+
+      ctx.globalAlpha = 1.0
+      animationFrameId = requestAnimationFrame(render)
+    }
+
+    render()
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseleave', handleMouseLeave)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
 
   return (
-    <div
-      style={{ position: 'absolute', inset: 0, ...style }}
-      onMouseMove={handleMouseMove}
-    >
-      <Canvas
-        camera={{ position: [0, 0, 2.4], fov: 60 }}
-        dpr={[1, 1.5]}
-        gl={{ antialias: false, alpha: true }}
-        style={{ background: 'transparent' }}
-      >
-        <ambientLight intensity={0.3} />
-        <Particles mouse={mouse} />
-      </Canvas>
+    <div style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'hidden', ...style }}>
+      <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
     </div>
   )
 }

@@ -1,36 +1,124 @@
 import axios from 'axios'
+import { checkIsAuthenticated } from './catalyst'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL
+const DJANGO_BASE_URL   = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000'
+const FASTAPI_BASE_URL  = import.meta.env.VITE_FASTAPI_URL    || 'http://localhost:8001'
 
-const api = axios.create({
-  baseURL: BASE_URL,
+// ── Django API Client (Port 8000) ──────────────────────────────────────────────
+// withCredentials: true ensures the ZGS session cookie is included automatically.
+// Catalyst validates the ZGS cookie server-side — no manual token injection needed.
+export const djangoApi = axios.create({
+  baseURL: DJANGO_BASE_URL,
   timeout: 60000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  withCredentials: true,       // ← Critical: sends ZGS cookie with every request
+  headers: { 'Content-Type': 'application/json' },
 })
 
-api.interceptors.response.use(
+// ── FastAPI AI Engine Client (Port 8001) ───────────────────────────────────────
+export const fastApi = axios.create({
+  baseURL: FASTAPI_BASE_URL,
+  timeout: 60000,
+  withCredentials: true,       // ← Critical: sends ZGS cookie with every request
+  headers: { 'Content-Type': 'application/json' },
+})
+
+// ── Request Interceptors ───────────────────────────────────────────────────────
+// Catalyst uses ZGS cookies (HttpOnly). withCredentials=true above handles this.
+// These interceptors add extra debug context in local dev mode.
+
+djangoApi.interceptors.request.use(
+  (config) => {
+    return config
+  },
+  (err) => Promise.reject(err)
+)
+
+fastApi.interceptors.request.use(
+  (config) => {
+    return config
+  },
+  (err) => Promise.reject(err)
+)
+
+// ── Response Interceptors ─────────────────────────────────────────────────────
+// Handle 401 Unauthorized: Catalyst session expired.
+// Clear local session and redirect to /login.
+
+const handle401 = async (error) => {
+  if (error?.response?.status === 401) {
+    console.warn('[Catalyst Auth] 401 Unauthorized — session expired. Redirecting to login.')
+    localStorage.removeItem('vigilx_auth_user')
+    localStorage.removeItem('vigilx_catalyst_session')
+
+    // Only redirect if not already on login page
+    if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/auth/')) {
+      window.location.href = '/login'
+    }
+  }
+  return Promise.reject(error)
+}
+
+djangoApi.interceptors.response.use(
   (res) => res,
   (err) => {
-    console.error('[VigilX API Error]', err.message)
-    return Promise.reject(err)
+    if (err?.response?.status !== 401) {
+      console.warn('[Django API]', err?.response?.status, err.message)
+    }
+    return handle401(err)
   }
 )
 
-// ─── AI Studio ───────────────────────────────────────────────
+fastApi.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err?.response?.status !== 401) {
+      console.warn('[FastAPI Engine]', err?.response?.status, err.message)
+    }
+    return handle401(err)
+  }
+)
+
+// ── AI Studio Endpoints ────────────────────────────────────────────────────────
+
+export const postV1Ask = (payload) =>
+  fastApi.post('/ai/ask', payload).then((r) => r.data).catch(() => {
+    return djangoApi.post('/ai/ask', payload).then((r) => r.data)
+  })
+
 export const postV2Ask = (payload) =>
-  api.post('/ai/v2/ask', payload).then((r) => r.data)
+  fastApi.post('/ai/v2/ask', payload).then((r) => r.data).catch(() => {
+    return djangoApi.post('/ai/v2/ask', payload).then((r) => r.data)
+  })
 
-// ─── Data Studio ─────────────────────────────────────────────
+// ── Auth Endpoints ─────────────────────────────────────────────────────────────
+
+/** GET /api/auth/me/ — Fetch the authenticated user's profile from Django backend */
+export const getAuthMe = () =>
+  djangoApi.get('/api/auth/me/').then((r) => r.data)
+
+/** GET /api/auth/providers/ — Fetch enabled auth providers list from backend */
+export const getAuthProviders = () =>
+  djangoApi.get('/api/auth/providers/').then((r) => r.data)
+
+/** POST /api/auth/logout/ — Terminate backend session */
+export const postAuthLogout = () =>
+  djangoApi.post('/api/auth/logout/').then((r) => r.data).catch(() => ({}))
+
+// ── Data Studio Endpoints ──────────────────────────────────────────────────────
+
 export const getAdapterTest = () =>
-  api.get('/adapter-test').then((r) => r.data)
+  djangoApi.get('/adapter-test').then((r) => r.data)
 
-// ─── Dashboard ───────────────────────────────────────────────
+// ── Dashboard Endpoints ────────────────────────────────────────────────────────
+
 export const getGeography = () =>
-  api.get('/ai/graph/geography').then((r) => r.data)
+  fastApi.get('/ai/graph/geography').then((r) => r.data).catch(() => {
+    return djangoApi.get('/ai/graph/geography').then((r) => r.data)
+  })
 
 export const getVisualize = () =>
-  api.get('/ai/graph/visualize').then((r) => r.data)
+  fastApi.get('/ai/graph/visualize').then((r) => r.data).catch(() => {
+    return djangoApi.get('/ai/graph/visualize').then((r) => r.data)
+  })
 
-export default api
+export default djangoApi
