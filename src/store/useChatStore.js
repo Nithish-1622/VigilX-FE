@@ -147,7 +147,7 @@ const useChatStore = create((set, get) => ({
   },
 
   clearV1: () => set({ v1Messages: [] }),
-  clearV2: () => set({ v2Messages: [], v2Pipeline: [] }),
+  clearV2: () => set({ v2Messages: [], v2Pipeline: [], sessionId: `sess-${Date.now()}` }),
 }))
 
 export default useChatStore
