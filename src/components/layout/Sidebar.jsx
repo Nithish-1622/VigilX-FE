@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Database, Brain, FlaskConical, MessageSquare,
   GitBranch, Settings, HelpCircle, ChevronLeft, ChevronDown, Shield,
-  Zap, Users, Cpu, BarChart2,
+  Zap, Users, Cpu, BarChart2, Wrench, FolderKanban, DollarSign, TrendingUp, Scale,
 } from 'lucide-react'
 import useAppStore from '../../store/useAppStore'
 
@@ -32,6 +32,17 @@ const NAV_ITEMS = [
     children: [
       { icon: GitBranch, label: 'Experiments', tab: 'experiment', path: '/app/experimental?tab=experiment' },
       { icon: BarChart2, label: 'Simulations', tab: 'simulation', path: '/app/experimental?tab=simulation' },
+    ],
+  },
+  {
+    icon: Wrench, label: 'Tools', path: '/app/tools',
+    children: [
+      { icon: FolderKanban, label: 'Investigation Hub', tab: 'investigation', path: '/app/tools?tab=investigation' },
+      { icon: BarChart2,     label: 'Analytics & GIS',  tab: 'analytics',     path: '/app/tools?tab=analytics' },
+      { icon: Users,         label: 'Suspect Profiling',tab: 'profiling',     path: '/app/tools?tab=profiling' },
+      { icon: DollarSign,    label: 'Financial Tracing',tab: 'finance',       path: '/app/tools?tab=finance' },
+      { icon: TrendingUp,    label: 'Forecasting',      tab: 'forecasting',   path: '/app/tools?tab=forecasting' },
+      { icon: Scale,         label: 'XAI & Auditing',   tab: 'xai',           path: '/app/tools?tab=xai' },
     ],
   },
 ]

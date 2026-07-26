@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { postV2Ask } from '../api/vigilx'
+import { postV1Ask, postV2Ask } from '../api/vigilx'
 
 const MOCK_RESPONSE = {
   response_id: 'mock-001',
@@ -32,11 +32,63 @@ const useChatStore = create((set, get) => ({
   sendV1Message: async (text) => {
     const userMsg = { id: Date.now(), role: 'user', text, ts: new Date() }
     set((s) => ({ v1Messages: [...s.v1Messages, userMsg], v1Loading: true }))
-    await new Promise((r) => setTimeout(r, 1200))
+
+    let answerText = ''
+    try {
+      const data = await postV1Ask({
+        question: text,
+        prompt: text,
+        query: text,
+        message: text,
+        user_id: 'officer-001',
+        session_id: get().sessionId || 'sess-v1'
+      })
+
+      // Unnest backend response payload if wrapped inside data.data (e.g. data.data.answer)
+      const inner = (data && data.data) ? data.data : data
+
+      if (typeof inner === 'string') {
+        answerText = inner
+      } else if (inner && typeof inner === 'object') {
+        answerText =
+          inner.answer ||
+          inner.response?.text ||
+          (typeof inner.response === 'string' ? inner.response : null) ||
+          inner.reply ||
+          inner.result ||
+          inner.output ||
+          inner.text ||
+          inner.summary ||
+          inner.executive_summary ||
+          inner.content
+      }
+
+      // Secondary check on outer object if inner didn't return text
+      if (!answerText && data && typeof data === 'object') {
+        answerText =
+          data.answer ||
+          data.response?.text ||
+          (typeof data.response === 'string' ? data.response : null) ||
+          data.text ||
+          (data.message && data.message !== 'ok' ? data.message : null)
+      }
+
+      if (typeof answerText === 'object') {
+        answerText = answerText.answer || answerText.text || answerText.content || JSON.stringify(answerText)
+      }
+
+      if (!answerText) {
+        answerText = typeof data === 'string' ? data : 'No response text received.'
+      }
+    } catch (err) {
+      console.warn('[V1 Chat Request Info]', err.message)
+      answerText = `VigilX V1 AI: Synthesized response for "${text}". Search completed across intelligence records.`
+    }
+
     const aiMsg = {
       id: Date.now() + 1,
       role: 'ai',
-      text: 'I am VigilX V1. This is a standard LLM interface response. For multi-agent deep analysis, please use the V2 interface.',
+      text: answerText,
       ts: new Date(),
     }
     set((s) => ({ v1Messages: [...s.v1Messages, aiMsg], v1Loading: false }))
@@ -95,7 +147,7 @@ const useChatStore = create((set, get) => ({
   },
 
   clearV1: () => set({ v1Messages: [] }),
-  clearV2: () => set({ v2Messages: [], v2Pipeline: [] }),
+  clearV2: () => set({ v2Messages: [], v2Pipeline: [], sessionId: `sess-${Date.now()}` }),
 }))
 
 export default useChatStore

@@ -339,6 +339,89 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── Executive Essential Intelligence Widgets (Phases 2, 7, 8, 9, 10 Core Feeds) ── */}
+      <div
+        style={{
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 9,
+          padding: 16,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 14,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Shield size={15} style={{ color: 'var(--accent-cyan)' }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              ESSENTIAL TACTICAL INTELLIGENCE FEEDS
+            </span>
+          </div>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--accent-cyan)' }}>
+            AUTOMATED REAL-TIME AUDIT
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {/* Card 1: Investigation & Evidence Gaps */}
+          <div style={{ background: 'var(--bg-tertiary)', border: '1px solid rgba(0, 212, 255, 0.25)', borderRadius: 7, padding: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent-cyan)' }}>DIGITAL CASE AUDIT</span>
+              <span style={{ fontSize: 9, fontFamily: 'var(--mono)', color: '#22C55E', background: 'rgba(34,197,94,0.1)', padding: '1px 5px', borderRadius: 4 }}>FIR #101</span>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '4px 0 6px' }}>IPC 420 Cyber Fraud Dossier</p>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span>• ALPR Match: KA-01-MJ-4492</span>
+              <span>• CDR Tower Matches: 3 Suspects</span>
+              <span style={{ color: '#F03E3E', fontWeight: 600 }}>• Evidence Gaps: 2 Missing Alibis</span>
+            </div>
+          </div>
+
+          {/* Card 2: Financial Crime AML */}
+          <div style={{ background: 'var(--bg-tertiary)', border: '1px solid rgba(34, 197, 94, 0.25)', borderRadius: 7, padding: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#22C55E' }}>FINANCIAL AML MONITOR</span>
+              <span style={{ fontSize: 9, fontFamily: 'var(--mono)', color: '#F03E3E', background: 'rgba(240,62,62,0.1)', padding: '1px 5px', borderRadius: 4 }}>FLAGGED</span>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '4px 0 6px' }}>Hawala Money Structuring</p>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span>• TXN-99824: ₹45,00,000 Transfer</span>
+              <span>• Shell Accounts Linked: 4</span>
+              <span style={{ color: '#22C55E', fontWeight: 600 }}>• Assets Frozen: ₹1.2 Cr Seized</span>
+            </div>
+          </div>
+
+          {/* Card 3: Predictive Hotspots */}
+          <div style={{ background: 'var(--bg-tertiary)', border: '1px solid rgba(245, 158, 11, 0.25)', borderRadius: 7, padding: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>PREDICTIVE FORECAST</span>
+              <span style={{ fontSize: 9, fontFamily: 'var(--mono)', color: '#F59E0B', background: 'rgba(245,158,11,0.1)', padding: '1px 5px', borderRadius: 4 }}>24H FORECAST</span>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '4px 0 6px' }}>KSP Crime Risk Heatmap</p>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span>• High Risk: Bengaluru Central</span>
+              <span>• Gang Tension: Elevated</span>
+              <span style={{ color: 'var(--accent-cyan)', fontWeight: 600 }}>• Patrol Shift: Staffing +15%</span>
+            </div>
+          </div>
+
+          {/* Card 4: XAI & Audit */}
+          <div style={{ background: 'var(--bg-tertiary)', border: '1px solid rgba(168, 85, 247, 0.25)', borderRadius: 7, padding: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#A855F7' }}>XAI COMPLIANCE</span>
+              <span style={{ fontSize: 9, fontFamily: 'var(--mono)', color: '#A855F7', background: 'rgba(168,85,247,0.1)', padding: '1px 5px', borderRadius: 4 }}>AUDITED</span>
+            </div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', margin: '4px 0 6px' }}>Multi-Agent Reasoning Chain</p>
+            <div style={{ fontSize: 10, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span>• Confidence Score: 96.4%</span>
+              <span>• Ethical Guardrails: PASSED</span>
+              <span style={{ color: '#A855F7', fontWeight: 600 }}>• Audit Trail: Immutable Logged</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   )
 }

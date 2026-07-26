@@ -39,6 +39,7 @@ import {
 } from 'lucide-react'
 import ConvergenceScene from '../components/landing/ConvergenceScene'
 import ParticleNetwork from '../components/three/ParticleNetwork'
+import FinoraHeroVisualizer from '../components/landing/FinoraHeroVisualizer'
 
 // ─── Static Data Definitions ──────────────────────────────────────────────────
 
@@ -168,6 +169,248 @@ const TERMINAL_LOGS = [
 
 // ─── Component Code ──────────────────────────────────────────────────────────
 
+function LiveTacticalHub() {
+  const [hubTab, setHubTab] = useState('workflow') // 'workflow' | 'graph' | 'telemetry'
+
+  return (
+    <div style={{
+      background: 'rgba(10, 14, 22, 0.92)',
+      border: '1px solid rgba(0, 200, 240, 0.3)',
+      borderRadius: 8,
+      overflow: 'hidden',
+      boxShadow: '0 0 50px rgba(0, 200, 240, 0.18)',
+      backdropFilter: 'blur(20px)',
+      fontFamily: "'Inter', sans-serif"
+    }}>
+      
+      {/* Top Command Bar */}
+      <div style={{
+        height: 38, background: '#070A12', borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981', boxShadow: '0 0 10px #10B981' }} />
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: '#E8EDF5', letterSpacing: '0.08em' }}>
+            VIGILX COMMAND HUB // MULTI-AGENT FUSION
+          </span>
+        </div>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#00C8F0', background: 'rgba(0,200,240,0.1)', border: '1px solid rgba(0,200,240,0.25)', padding: '2px 8px', borderRadius: 2 }}>
+          ● 4 AGENTS IN CONSENSUS (99.4%)
+        </span>
+      </div>
+
+      {/* Interactive Mode Tabs */}
+      <div style={{ display: 'flex', background: 'rgba(6, 8, 12, 0.9)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', padding: '4px 8px', gap: 4 }}>
+        <button
+          onClick={() => setHubTab('workflow')}
+          style={{
+            flex: 1, padding: '7px 0', border: 'none', borderRadius: 3, fontSize: 10, fontWeight: 700,
+            fontFamily: 'JetBrains Mono, monospace', cursor: 'pointer', transition: 'all 0.2s',
+            color: hubTab === 'workflow' ? '#00C8F0' : '#64748B',
+            background: hubTab === 'workflow' ? 'rgba(0, 200, 240, 0.12)' : 'transparent',
+            border: hubTab === 'workflow' ? '1px solid rgba(0, 200, 240, 0.3)' : '1px solid transparent'
+          }}
+        >
+          🧠 AGENT FLEET
+        </button>
+
+        <button
+          onClick={() => setHubTab('graph')}
+          style={{
+            flex: 1, padding: '7px 0', border: 'none', borderRadius: 3, fontSize: 10, fontWeight: 700,
+            fontFamily: 'JetBrains Mono, monospace', cursor: 'pointer', transition: 'all 0.2s',
+            color: hubTab === 'graph' ? '#00C8F0' : '#64748B',
+            background: hubTab === 'graph' ? 'rgba(0, 200, 240, 0.12)' : 'transparent',
+            border: hubTab === 'graph' ? '1px solid rgba(0, 200, 240, 0.3)' : '1px solid transparent'
+          }}
+        >
+          🕸️ LINK MATRIX
+        </button>
+
+        <button
+          onClick={() => setHubTab('telemetry')}
+          style={{
+            flex: 1, padding: '7px 0', border: 'none', borderRadius: 3, fontSize: 10, fontWeight: 700,
+            fontFamily: 'JetBrains Mono, monospace', cursor: 'pointer', transition: 'all 0.2s',
+            color: hubTab === 'telemetry' ? '#00C8F0' : '#64748B',
+            background: hubTab === 'telemetry' ? 'rgba(0, 200, 240, 0.12)' : 'transparent',
+            border: hubTab === 'telemetry' ? '1px solid rgba(0, 200, 240, 0.3)' : '1px solid transparent'
+          }}
+        >
+          📍 SPATIAL MAP
+        </button>
+      </div>
+
+      {/* Main Hub Body */}
+      <div style={{ padding: 20 }}>
+        {hubTab === 'workflow' && (
+          <div>
+            {/* Live Query Console */}
+            <div style={{ background: '#050810', border: '1px solid rgba(0, 200, 240, 0.2)', borderRadius: 4, padding: '10px 14px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Search size={13} style={{ color: '#00C8F0' }} />
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#38BDF8' }}>
+                  Fusing: Target Alpha + ALPR ZX-7742-B + Harbor Sector
+                </span>
+              </div>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#10B981', background: 'rgba(16,185,129,0.1)', padding: '2px 6px', borderRadius: 2 }}>
+                LATENCY 1.18s
+              </span>
+            </div>
+
+            {/* Agent Fleet Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+              
+              <div style={{ background: 'rgba(6, 8, 12, 0.8)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 4, padding: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: '#F8FAFC' }}>
+                    🧠 AnalystAgent
+                  </span>
+                  <span style={{ fontSize: 9, color: '#10B981', fontFamily: 'JetBrains Mono, monospace' }}>COMPLETE</span>
+                </div>
+                <div style={{ fontSize: 11, color: '#94A3B8', lineHeight: 1.4 }}>
+                  Natural language query parser synthesized 14,880 suspect records.
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(6, 8, 12, 0.8)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 4, padding: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: '#F8FAFC' }}>
+                    🕸️ GraphAgent
+                  </span>
+                  <span style={{ fontSize: 9, color: '#10B981', fontFamily: 'JetBrains Mono, monospace' }}>COMPLETE</span>
+                </div>
+                <div style={{ fontSize: 11, color: '#94A3B8', lineHeight: 1.4 }}>
+                  Mapped 2,341 Neo4j graph nodes & 14 CDR contact edges.
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(6, 8, 12, 0.8)', border: '1px solid rgba(0, 200, 240, 0.3)', borderRadius: 4, padding: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: '#00C8F0' }}>
+                    📍 GeoAgent
+                  </span>
+                  <span style={{ fontSize: 9, color: '#00C8F0', fontFamily: 'JetBrains Mono, monospace' }}>ACTIVE</span>
+                </div>
+                <div style={{ fontSize: 11, color: '#94A3B8', lineHeight: 1.4 }}>
+                  Correlating Harbor District ALPR scan (34.0522, -118.2437).
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(6, 8, 12, 0.8)', border: '1px solid rgba(139, 92, 246, 0.3)', borderRadius: 4, padding: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, color: '#A78BFA' }}>
+                    🛡️ CriticAgent
+                  </span>
+                  <span style={{ fontSize: 9, color: '#A78BFA', fontFamily: 'JetBrains Mono, monospace' }}>99.4% CONF</span>
+                </div>
+                <div style={{ fontSize: 11, color: '#94A3B8', lineHeight: 1.4 }}>
+                  14/14 evidence points grounded in case_4421.pdf transcript.
+                </div>
+              </div>
+
+            </div>
+
+            {/* Evidence Badges Strip */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 110, background: 'rgba(0, 200, 240, 0.08)', border: '1px solid rgba(0, 200, 240, 0.25)', borderRadius: 4, padding: '8px 10px' }}>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#64748B' }}>SUSPECT NODE</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#00C8F0', marginTop: 2 }}>Target Alpha (Risk 89%)</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 110, background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: 4, padding: '8px 10px' }}>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#64748B' }}>ALPR MATCH</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#10B981', marginTop: 2 }}>ZX-7742-B (3 Flags)</div>
+              </div>
+              <div style={{ flex: 1, minWidth: 110, background: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.25)', borderRadius: 4, padding: '8px 10px' }}>
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#64748B' }}>CASE EVIDENCE</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#A78BFA', marginTop: 2 }}>case_4421.pdf (Verified)</div>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {hubTab === 'graph' && (
+          <div>
+            <div style={{ background: '#050810', border: '1px solid rgba(0, 200, 240, 0.2)', borderRadius: 4, padding: 16, marginBottom: 16 }}>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#00C8F0', marginBottom: 10, letterSpacing: '0.08em' }}>
+                KNOWLEDGE GRAPH EDGE RELATIONSHIPS
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontFamily: 'JetBrains Mono, monospace', fontSize: 11 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+                  <span style={{ color: '#E8EDF5' }}>[Target Alpha] ──(Drives)──► [ZX-7742-B]</span>
+                  <span style={{ color: '#00C8F0' }}>Degree: 14</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+                  <span style={{ color: '#E8EDF5' }}>[ZX-7742-B] ──(ALPR Scan)──► [Harbor Sector]</span>
+                  <span style={{ color: '#10B981' }}>Score: 0.94</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+                  <span style={{ color: '#E8EDF5' }}>[Target Alpha] ──(Calls 47x)──► [+1-555-9182]</span>
+                  <span style={{ color: '#F59E0B' }}>CDR Linked</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+                  <span style={{ color: '#E8EDF5' }}>[+1-555-9182] ──(Cited in)──► [case_4421.pdf]</span>
+                  <span style={{ color: '#A78BFA' }}>Para 14</span>
+                </div>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#64748B', textAlign: 'center' }}>
+              CENTRALITY RANK: 0.942 · 8,912 RELATIONSHIPS ACTIVE IN MESH
+            </div>
+          </div>
+        )}
+
+        {hubTab === 'telemetry' && (
+          <div>
+            <div style={{ background: '#050810', border: '1px solid rgba(0, 200, 240, 0.2)', borderRadius: 4, padding: 16, marginBottom: 16 }}>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#10B981', marginBottom: 10, letterSpacing: '0.08em' }}>
+                SPATIAL RADAR & SENSOR TELEMETRY
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontFamily: 'JetBrains Mono, monospace', fontSize: 11 }}>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: 9 }}>LAT / LON COORDINATES</div>
+                  <div style={{ color: '#E8EDF5', fontWeight: 700, marginTop: 2 }}>34.0522 N, -118.2437 W</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: 9 }}>SENSOR HARDWARE</div>
+                  <div style={{ color: '#00C8F0', fontWeight: 700, marginTop: 2 }}>ALPR-CAM-4402</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: 9 }}>ACTIVE PERIMETER</div>
+                  <div style={{ color: '#E8EDF5', fontWeight: 700, marginTop: 2 }}>1.4 km Radius</div>
+                </div>
+                <div>
+                  <div style={{ color: '#64748B', fontSize: 9 }}>STREAM THROUGHPUT</div>
+                  <div style={{ color: '#10B981', fontWeight: 700, marginTop: 2 }}>120,400 events/sec</div>
+                </div>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#64748B', textAlign: 'center' }}>
+              HARDWARE SCAN LATENCY: &lt; 32ms · ZERO DATA EGRESS GUARANTEE
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Command Hub Bottom Footer */}
+      <div style={{
+        height: 32, background: '#05070D', borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px'
+      }}>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#64748B' }}>
+          5 DATABASES FUSED · 0 HALLUCINATIONS
+        </span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#10B981' }}>
+          ● TS//SCI GROUNDED
+        </span>
+      </div>
+
+    </div>
+  )
+}
+
 export default function Landing() {
   const navigate = useNavigate()
   const reduced = useReducedMotion()
@@ -187,13 +430,19 @@ export default function Landing() {
     <div style={{ position: 'relative', minHeight: '100vh', background: '#06080C', color: '#E8EDF5', overflowX: 'hidden', fontFamily: "'Inter', sans-serif" }}>
 
       {/* ── 1. BACKGROUND GRAPH ANIMATION CANVAS ───────────────────────── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-        <ParticleNetwork style={{ opacity: 0.55 }} />
-        {/* Dark radial glow overlay for visual depth */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+        {/* Dark radial glow overlay behind canvas */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'radial-gradient(circle at 50% 20%, rgba(0, 200, 240, 0.08) 0%, transparent 60%), radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.06) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(6, 8, 12, 0.8) 0%, rgba(6, 8, 12, 0.98) 100%)'
+          background: 'radial-gradient(circle at 50% 35%, rgba(0, 240, 200, 0.18) 0%, transparent 60%), radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%)'
         }} />
+        {/* Decorative Thin Vector Arc Lines matching Syngri reference design */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.35, pointerEvents: 'none' }}>
+          <path d="M 600 -100 Q 950 300 1400 900" fill="none" stroke="rgba(255, 255, 255, 0.5)" strokeWidth="1" />
+          <path d="M 800 200 Q 1200 600 1600 1200" fill="none" stroke="rgba(0, 200, 240, 0.4)" strokeWidth="1" />
+        </svg>
+        {/* Constellation Particle Network Canvas */}
+        <ParticleNetwork style={{ width: '100%', height: '100%', opacity: 1 }} />
       </div>
 
       {/* ── 2. FIXED TOPBAR HEADER ──────────────────────────────────────── */}
@@ -264,45 +513,41 @@ export default function Landing() {
       <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', alignItems: 'center', paddingTop: 74, paddingBottom: 40 }}>
         <div style={{ maxWidth: 1280, width: '100%', margin: '0 auto', padding: '0 32px', display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
 
-          {/* Left Column: Copy & Actions */}
+          {/* Left Column: Headline, Copy, CTA Button & Trust Avatars */}
           <div style={{ flex: '1 1 52%', minWidth: 320, paddingRight: 24 }}>
             
-            {/* Classification Pill */}
+            {/* Finora Translucent Pill Badge with VigilX Colors */}
             <motion.div
               initial={reduced ? false : { opacity: 0, x: -12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 24 }}
+              style={{ marginBottom: 28 }}
             >
-              <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 9, fontWeight: 700, letterSpacing: '0.2em',
-                color: '#E53E3E', background: 'rgba(229, 62, 62, 0.08)', border: '1px solid rgba(229, 62, 62, 0.25)',
-                padding: '4px 12px', borderRadius: 2, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6
-              }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#E53E3E', boxShadow: '0 0 8px #E53E3E' }} />
-                TOP SECRET // SCI // NOFORN
-              </span>
-              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#4A5568', letterSpacing: '0.1em' }}>
-                AIR-GAP COMPLIANT
-              </span>
+              
             </motion.div>
 
-            {/* Main Headline */}
+            {/* Main Editorial AI Cyber Headline */}
             <motion.h1
               initial={reduced ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               style={{
-                fontSize: 'clamp(38px, 4.8vw, 64px)', fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1.08,
-                color: '#F7FAFC', marginBottom: 20
+                fontSize: 'clamp(46px, 5.6vw, 76px)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05,
+                color: '#FFFFFF', marginBottom: 24, fontFamily: "'Plus Jakarta Sans', sans-serif"
               }}
             >
-              Unified Data Fusion & <br />
+              Unlock a New Standard 
+              of{' '}
               <span style={{
-                background: 'linear-gradient(135deg, #00C8F0 0%, #8B5CF6 100%)',
-                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+                fontFamily: "'Cormorant Garamond', 'Instrument Serif', Georgia, serif",
+                fontStyle: 'italic',
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #00C8F0 0%, #8B5CF6 60%, #D946EF 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                paddingRight: 6
               }}>
-                Multi-Agent Graph Intelligence
+                Criminal Intelligence
               </span>
             </motion.h1>
 
@@ -311,112 +556,71 @@ export default function Landing() {
               initial={reduced ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              style={{ fontSize: 15, color: '#94A3B8', lineHeight: 1.68, maxWidth: 540, marginBottom: 36 }}
+              style={{ fontSize: 15, color: '#94A3B8', lineHeight: 1.68, maxWidth: 520, marginBottom: 36 }}
             >
-              VigilX connects your organization's PostgreSQL, Neo4j, MongoDB, ALPR scans, CDR logs, and PDF case files into one interrogable knowledge layer. Execute complex multi-database queries with automated multi-agent consensus and complete source grounding.
+              A modern intelligence platform that brings federated analytics, multi-agent reasoning, and seamless database fusion together, helping you make faster, smarter, and more confident decisions.
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* Finora Offset Double-Layer Glowing CTA Button */}
             <motion.div
               initial={reduced ? false : { opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', marginBottom: 48 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 44 }}
             >
-              <button
-                onClick={() => navigate('/app')}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10, padding: '13px 28px', borderRadius: 3,
-                  fontSize: 13, fontWeight: 700, color: '#06080C', background: '#00C8F0', border: 'none',
-                  cursor: 'pointer', letterSpacing: '0.05em', transition: 'all 0.2s',
-                  boxShadow: '0 0 24px rgba(0, 200, 240, 0.4)'
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#33D6F6'; e.currentTarget.style.boxShadow = '0 0 32px rgba(0, 200, 240, 0.6)' }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#00C8F0'; e.currentTarget.style.boxShadow = '0 0 24px rgba(0, 200, 240, 0.4)' }}
-              >
-                ENTER SECURE PORTAL <ArrowRight size={15} />
-              </button>
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                {/* Offset Backing Glowing Border Ring */}
+                <div style={{
+                  position: 'absolute', inset: 0, top: 6, left: 6,
+                  borderRadius: 18, border: '1.5px solid rgba(139, 92, 246, 0.7)',
+                  background: 'transparent',
+                  boxShadow: '0 0 18px rgba(139, 92, 246, 0.45)',
+                  pointerEvents: 'none'
+                }} />
 
-              <a
-                href="#studios"
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '13px 24px', borderRadius: 3,
-                  fontSize: 13, fontWeight: 600, color: '#CBD5E1', background: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)', textDecoration: 'none', transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#00C8F0'; e.currentTarget.style.color = '#00C8F0' }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)'; e.currentTarget.style.color = '#CBD5E1' }}
-              >
-                EXPLORE CAPABILITIES
-              </a>
+                {/* Front Interactive Button Card */}
+                <button
+                  onClick={() => navigate('/app')}
+                  style={{
+                    position: 'relative',
+                    padding: '14px 34px', borderRadius: 16,
+                    fontSize: 14, fontWeight: 600, color: '#FFFFFF',
+                    background: 'radial-gradient(circle at 20% 20%, rgba(139, 92, 246, 0.4) 0%, rgba(12, 8, 24, 0.96) 75%)',
+                    border: '1.5px solid rgba(168, 85, 247, 0.75)',
+                    boxShadow: '0 0 24px rgba(139, 92, 246, 0.45), inset 0 1px 10px rgba(168, 85, 247, 0.3)',
+                    cursor: 'pointer', letterSpacing: '0.02em', transition: 'all 0.25s ease',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif"
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)'
+                    e.currentTarget.style.borderColor = '#00C8F0'
+                    e.currentTarget.style.boxShadow = '0 0 35px rgba(0, 200, 240, 0.7), inset 0 1px 15px rgba(0, 200, 240, 0.4)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translate(0, 0)'
+                    e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.75)'
+                    e.currentTarget.style.boxShadow = '0 0 24px rgba(139, 92, 246, 0.45), inset 0 1px 10px rgba(168, 85, 247, 0.3)'
+                  }}
+                >
+                  Get Start Now
+                </button>
+              </div>
             </motion.div>
 
-            {/* Metrics Bar */}
+            {/* Finora Trust Avatars Strip */}
             <motion.div
               initial={reduced ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              style={{
-                display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1,
-                background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.08)',
-                borderRadius: 4, overflow: 'hidden'
-              }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12 }}
             >
-              {STATS.map((s) => (
-                <div key={s.l} style={{ padding: '12px 14px', background: 'rgba(10, 14, 22, 0.85)', textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 16, fontWeight: 700, color: '#00C8F0', letterSpacing: '-0.02em' }}>{s.v}</div>
-                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 8, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 4 }}>{s.l}</div>
-                </div>
-              ))}
             </motion.div>
 
           </div>
 
-          {/* Right Column: Convergence Graph Stage */}
-          <div style={{ flex: '1 1 45%', minWidth: 320, height: 480, position: 'relative', marginTop: 24 }}>
-            <div style={{
-              position: 'relative', width: '100%', height: '100%',
-              background: 'rgba(10, 14, 22, 0.6)', border: '1px solid rgba(0, 200, 240, 0.2)',
-              borderRadius: 6, overflow: 'hidden', boxShadow: '0 0 40px rgba(0, 200, 240, 0.1)'
-            }}>
-
-              {/* Stage Top Bar */}
-              <div style={{
-                position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, height: 32,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px',
-                background: 'rgba(6, 8, 12, 0.9)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444' }} />
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B' }} />
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10B981' }} />
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#64748B', marginLeft: 8 }}>
-                    CONVERGENCE_ENGINE // 3D GRAPH VISUALIZER
-                  </span>
-                </div>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 8, color: '#00C8F0', letterSpacing: '0.1em' }}>
-                  {scenePhase >= 2 ? '● GRAPH RESOLVED (8 SOURCES)' : '● FUSING DATA SOURCES...'}
-                </span>
-              </div>
-
-              {/* 3D Canvas component */}
-              <ConvergenceScene onPhaseChange={setScenePhase} />
-
-              {/* Stage Footer Tag */}
-              <div style={{
-                position: 'absolute', bottom: 12, left: 16, right: 16, zIndex: 10,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '6px 12px', background: 'rgba(6, 8, 12, 0.85)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: 3
-              }}>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#94A3B8' }}>
-                  ACTIVE NODES: PostgreSQL · Neo4j · ALPR · CDR · PDF
-                </span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: '#00C8F0' }}>
-                  FPS: 60 · REALTIME
-                </span>
-              </div>
-
-            </div>
+          {/* Right Column: Finora Isometric Cyber Intelligence Platform Stage */}
+          <div style={{ flex: '1 1 48%', minWidth: 340, height: 540, position: 'relative', marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <FinoraHeroVisualizer />
           </div>
 
         </div>
