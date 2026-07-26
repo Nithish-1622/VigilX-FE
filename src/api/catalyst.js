@@ -27,9 +27,8 @@ export const getCatalystSDK = () => {
 
   try {
     if (window.catalyst) {
-      window.catalyst.init({ project_ID: PROJECT_ID, environment: ENVIRONMENT })
       _sdk = window.catalyst
-      console.log('[Catalyst SDK] Initialized via window.catalyst CDN')
+      console.log('[Catalyst SDK] Retrieved window.catalyst instance (automatically initialized by init.js)')
       return _sdk
     }
   } catch (e) {
@@ -250,14 +249,18 @@ export const verifyEmailToken = async (token) => {
  */
 export const catalystSignUp = async (email, password, firstName = '', lastName = '') => {
   const sdk = getCatalystSDK()
-  const signupConfig = {
-    platform_type: 'web',
-    redirect_url: `${window.location.origin}/auth/callback`,
-  }
 
   if (sdk?.auth?.signUp) {
     try {
-      const result = await sdk.auth.signUp(email, password, firstName, lastName, signupConfig)
+      // Catalyst signUp expects a single configuration object
+      const signupData = {
+        first_name: firstName || 'Officer',
+        last_name: lastName || 'User', // Mandatory field in Catalyst
+        email_id: email,               // Mandatory field in Catalyst
+        platform_type: 'web',
+        redirect_url: `${window.location.origin}/auth/callback`,
+      }
+      const result = await sdk.auth.signUp(signupData)
       return result
     } catch (e) {
       throw new Error(e?.message || 'Registration failed. Please try again.')

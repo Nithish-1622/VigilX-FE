@@ -32,6 +32,15 @@ export default defineConfig({
         target: 'http://localhost:8001',
         changeOrigin: true,
       },
+      // ── Catalyst SDK Init Proxy (Proxies init.js from live container) ──────
+      '/__catalyst': {
+        target: 'https://vigilx.development.catalystappsail.in',
+        changeOrigin: true,
+      },
+      '/baas': {
+        target: 'https://vigilx.development.catalystappsail.in',
+        changeOrigin: true,
+      },
     },
   },
 })
