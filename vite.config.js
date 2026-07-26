@@ -41,6 +41,11 @@ export default defineConfig({
         target: 'https://vigilx.development.catalystappsail.in',
         changeOrigin: true,
       },
+      // ── Catalyst Accounts Proxy (Proxies logout & authentication) ──────────
+      '/accounts': {
+        target: 'https://accounts.zohoportal.in',
+        changeOrigin: true,
+      },
     },
   },
 })

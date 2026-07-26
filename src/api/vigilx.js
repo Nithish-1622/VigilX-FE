@@ -1,16 +1,14 @@
 import axios from 'axios'
-import { checkIsAuthenticated } from './catalyst'
+import { checkIsAuthenticated, getCatalystSDK } from './catalyst'
 
 const DJANGO_BASE_URL   = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000'
 const FASTAPI_BASE_URL  = import.meta.env.VITE_FASTAPI_URL    || 'http://localhost:8001'
 
 // ── Django API Client (Port 8000) ──────────────────────────────────────────────
-// withCredentials: true ensures the ZGS session cookie is included automatically.
-// Catalyst validates the ZGS cookie server-side — no manual token injection needed.
 export const djangoApi = axios.create({
   baseURL: DJANGO_BASE_URL,
   timeout: 60000,
-  withCredentials: true,       // ← Critical: sends ZGS cookie with every request
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -18,23 +16,48 @@ export const djangoApi = axios.create({
 export const fastApi = axios.create({
   baseURL: FASTAPI_BASE_URL,
   timeout: 60000,
-  withCredentials: true,       // ← Critical: sends ZGS cookie with every request
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 })
 
 // ── Request Interceptors ───────────────────────────────────────────────────────
-// Catalyst uses ZGS cookies (HttpOnly). withCredentials=true above handles this.
-// These interceptors add extra debug context in local dev mode.
 
 djangoApi.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Only generate token if we have an active local session to avoid SDK crash
+    if (localStorage.getItem('vigilx_auth_user')) {
+      const sdk = getCatalystSDK()
+      if (sdk?.auth?.generateAuthToken) {
+        try {
+          const res = await sdk.auth.generateAuthToken()
+          if (res?.access_token) {
+            config.headers['Authorization'] = res.access_token
+          }
+        } catch (e) {
+          console.warn('[Django API] Failed to generate auth token:', e.message)
+        }
+      }
+    }
     return config
   },
   (err) => Promise.reject(err)
 )
 
 fastApi.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    if (localStorage.getItem('vigilx_auth_user')) {
+      const sdk = getCatalystSDK()
+      if (sdk?.auth?.generateAuthToken) {
+        try {
+          const res = await sdk.auth.generateAuthToken()
+          if (res?.access_token) {
+            config.headers['Authorization'] = res.access_token
+          }
+        } catch (e) {
+          console.warn('[FastAPI API] Failed to generate auth token:', e.message)
+        }
+      }
+    }
     return config
   },
   (err) => Promise.reject(err)

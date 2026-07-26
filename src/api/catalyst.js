@@ -84,31 +84,10 @@ export const checkIsAuthenticated = async () => {
  * Sign in with email and password via Catalyst.
  * On success the ZGS session cookie is set automatically.
  */
-export const catalystSignIn = async (email, password) => {
-  const sdk = getCatalystSDK()
-  if (sdk?.auth?.signIn) {
-    try {
-      const result = await sdk.auth.signIn(email, password)
-      return result
-    } catch (e) {
-      // Re-throw so store can handle and display proper error
-      throw new Error(e?.message || 'Invalid credentials. Please try again.')
-    }
-  }
-
-  // Local dev fallback — simulates sign in without real Catalyst
-  console.log('[Catalyst Auth] Local dev mode — simulating email sign in')
-  const userProfile = {
-    email,
-    first_name: email.split('@')[0] || 'Officer',
-    last_name: 'User',
-    display_name: email.split('@')[0] || 'Officer User',
-    user_id: 'local_' + Date.now(),
-    auth_provider: 'email',
-    role: 'Intelligence Officer',
-  }
-  localStorage.setItem('vigilx_auth_user', JSON.stringify(userProfile))
-  return { status: 'success', user: userProfile }
+export const catalystSignIn = async () => {
+  // Direct browser redirect to Zoho's secure hosted login page
+  window.location.href = '/__catalyst/auth/login'
+  return { status: 'success' }
 }
 
 // ── Google OAuth Sign In ──────────────────────────────────────────────────────
@@ -247,38 +226,10 @@ export const verifyEmailToken = async (token) => {
  * Register a new user via Catalyst.
  * Catalyst will send an email verification link if email verification is enabled.
  */
-export const catalystSignUp = async (email, password, firstName = '', lastName = '') => {
-  const sdk = getCatalystSDK()
-
-  if (sdk?.auth?.signUp) {
-    try {
-      // Catalyst signUp expects a single configuration object
-      const signupData = {
-        first_name: firstName || 'Officer',
-        last_name: lastName || 'User', // Mandatory field in Catalyst
-        email_id: email,               // Mandatory field in Catalyst
-        platform_type: 'web',
-        redirect_url: `${window.location.origin}/auth/callback`,
-      }
-      const result = await sdk.auth.signUp(signupData)
-      return result
-    } catch (e) {
-      throw new Error(e?.message || 'Registration failed. Please try again.')
-    }
-  }
-
-  // Local dev fallback
-  const userProfile = {
-    email,
-    first_name: firstName || email.split('@')[0] || 'Officer',
-    last_name: lastName || 'User',
-    display_name: `${firstName} ${lastName}`.trim() || email.split('@')[0],
-    user_id: 'local_' + Date.now(),
-    auth_provider: 'email',
-    role: 'Intelligence Officer',
-  }
-  localStorage.setItem('vigilx_auth_user', JSON.stringify(userProfile))
-  return { status: 'success', user: userProfile }
+export const catalystSignUp = async () => {
+  // Direct browser redirect to Zoho's secure hosted signup page
+  window.location.href = '/__catalyst/auth/signup'
+  return { status: 'success' }
 }
 
 // ── Sign Out ──────────────────────────────────────────────────────────────────
