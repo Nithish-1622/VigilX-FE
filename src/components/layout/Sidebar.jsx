@@ -13,18 +13,18 @@ const NAV_ITEMS = [
   {
     icon: Database, label: 'Data Studio', path: '/app/data-studio',
     children: [
-      { icon: Database,      label: 'DB Connectors', tab: 'connectors', path: '/app/data-studio?tab=connectors' },
-      { icon: MessageSquare, label: 'DB Chatbot',    tab: 'chatbot',    path: '/app/data-studio?tab=chatbot' },
-      { icon: GitBranch,     label: 'ETL Pipelines', tab: 'pipelines',  path: '/app/data-studio?tab=pipelines' },
+      { icon: Database, label: 'DB Connectors', tab: 'connectors', path: '/app/data-studio?tab=connectors' },
+      { icon: MessageSquare, label: 'DB Chatbot', tab: 'chatbot', path: '/app/data-studio?tab=chatbot' },
+      { icon: GitBranch, label: 'ETL Pipelines', tab: 'pipelines', path: '/app/data-studio?tab=pipelines' },
     ],
   },
   {
     icon: Brain, label: 'AI Studio', path: '/app/ai-studio',
     children: [
-      { icon: Zap,           label: 'V2 Multi-Agent', tab: 'v2',     path: '/app/ai-studio?tab=v2' },
-      { icon: MessageSquare, label: 'V1 Chat',        tab: 'v1',     path: '/app/ai-studio?tab=v1' },
-      { icon: Users,         label: 'Agents Fleet',   tab: 'agents', path: '/app/ai-studio?tab=agents' },
-      { icon: Cpu,           label: 'ML Studio',      tab: 'ml',     path: '/app/ai-studio?tab=ml' },
+      { icon: Zap, label: 'Multi Agent Orchestration', tab: 'v2', path: '/app/ai-studio?tab=v2' },
+      { icon: MessageSquare, label: 'Conversation AI', tab: 'v1', path: '/app/ai-studio?tab=v1' },
+      { icon: Users, label: 'Agents Fleet', tab: 'agents', path: '/app/ai-studio?tab=agents' },
+      { icon: Cpu, label: 'ML Studio', tab: 'ml', path: '/app/ai-studio?tab=ml' },
     ],
   },
   {
@@ -38,24 +38,24 @@ const NAV_ITEMS = [
     icon: Wrench, label: 'Tools', path: '/app/tools',
     children: [
       { icon: FolderKanban, label: 'Investigation Hub', tab: 'investigation', path: '/app/tools?tab=investigation' },
-      { icon: BarChart2,     label: 'Analytics & GIS',  tab: 'analytics',     path: '/app/tools?tab=analytics' },
-      { icon: Users,         label: 'Suspect Profiling',tab: 'profiling',     path: '/app/tools?tab=profiling' },
-      { icon: DollarSign,    label: 'Financial Tracing',tab: 'finance',       path: '/app/tools?tab=finance' },
-      { icon: TrendingUp,    label: 'Forecasting',      tab: 'forecasting',   path: '/app/tools?tab=forecasting' },
-      { icon: Scale,         label: 'XAI & Auditing',   tab: 'xai',           path: '/app/tools?tab=xai' },
+      { icon: BarChart2, label: 'Analytics & GIS', tab: 'analytics', path: '/app/tools?tab=analytics' },
+      { icon: Users, label: 'Suspect Profiling', tab: 'profiling', path: '/app/tools?tab=profiling' },
+      { icon: DollarSign, label: 'Financial Tracing', tab: 'finance', path: '/app/tools?tab=finance' },
+      { icon: TrendingUp, label: 'Forecasting', tab: 'forecasting', path: '/app/tools?tab=forecasting' },
+      { icon: Scale, label: 'XAI & Auditing', tab: 'xai', path: '/app/tools?tab=xai' },
     ],
   },
 ]
 
 const BOTTOM_ITEMS = [
-  { icon: Settings,   label: 'Settings', path: '/app/settings' },
-  { icon: HelpCircle, label: 'Help',     path: '/app/help' },
+  { icon: Settings, label: 'Settings', path: '/app/settings' },
+  { icon: HelpCircle, label: 'Help', path: '/app/help' },
 ]
 
 export default function Sidebar() {
-  const collapsed     = useAppStore((s) => s.sidebarCollapsed)
+  const collapsed = useAppStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useAppStore((s) => s.toggleSidebar)
-  const navigate      = useNavigate()
+  const navigate = useNavigate()
 
   return (
     <motion.aside
@@ -136,7 +136,7 @@ export default function Sidebar() {
 function SidebarItem({ item, collapsed }) {
   const { icon: Icon, label, path, children } = item
   const location = useLocation()
-  const navigate  = useNavigate()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isParentActive = location.pathname.startsWith(path)
   const [expanded, setExpanded] = useState(isParentActive)

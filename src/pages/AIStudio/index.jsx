@@ -7,10 +7,10 @@ import AgentsDirectory from './AgentsDirectory'
 import MLPage from './MLPage'
 
 const PAGE_TITLES = {
-  v2:     { label: 'V2 Multi-Agent',  sub: 'Coordinated AI agent pipeline with DAG execution' },
-  v1:     { label: 'V1 Chat',         sub: 'Standard LLM conversational interface' },
-  agents: { label: 'Agents Fleet',    sub: '12 specialized agents · architecture & live status' },
-  ml:     { label: 'ML Studio',       sub: 'Predictive models · training · evaluation' },
+  v2: { label: 'Multi Agent Orchestration', sub: 'Coordinated AI agent pipeline with DAG execution' },
+  v1: { label: 'Conversation AI', sub: 'Standard LLM conversational interface' },
+  agents: { label: 'Agents Fleet', sub: '12 specialized agents · architecture & live status' },
+  ml: { label: 'ML Studio', sub: 'Predictive models · training · evaluation' },
 }
 
 export default function AIStudio() {
@@ -44,10 +44,10 @@ export default function AIStudio() {
         transition={{ duration: 0.15 }}
         style={{ flex: 1 }}
       >
-        {tab === 'v2'     && <ChatV2 />}
-        {tab === 'v1'     && <ChatV1 />}
+        {tab === 'v2' && <ChatV2 />}
+        {tab === 'v1' && <ChatV1 />}
         {tab === 'agents' && <AgentsDirectory />}
-        {tab === 'ml'     && <MLPage />}
+        {tab === 'ml' && <MLPage />}
       </motion.div>
     </div>
   )
