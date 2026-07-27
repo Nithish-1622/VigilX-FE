@@ -25,7 +25,7 @@ export default function AIStudio() {
   const current = PAGE_TITLES[tab] || PAGE_TITLES.v2
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', padding: '32px 40px' }}>
       {/* Page header — title updates based on active tab */}
       <div style={{ paddingBottom: 12, borderBottom: '1px solid var(--border-subtle)' }}>
         <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
