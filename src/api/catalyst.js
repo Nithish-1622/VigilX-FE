@@ -28,7 +28,14 @@ export const getCatalystSDK = () => {
   try {
     if (window.catalyst) {
       _sdk = window.catalyst
-      console.log('[Catalyst SDK] Retrieved window.catalyst instance (automatically initialized by init.js)')
+      if (!_sdk.isInitialized) {
+        _sdk.init({
+          projectId: PROJECT_ID,
+          environment: ENVIRONMENT
+        })
+        _sdk.isInitialized = true
+      }
+      console.log('[Catalyst SDK] Retrieved window.catalyst instance and manually initialized it')
       return _sdk
     }
   } catch (e) {
