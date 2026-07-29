@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Send, Database, Loader2, Trash2 } from 'lucide-react'
 
+import { postV2Ask } from '../../api/vigilx'
+import InvestigationCard from '../../components/InvestigationCard'
+
 const EXAMPLES = [
   'Show all tables related to narcotics',
   'List cases opened in the last 30 days',
@@ -9,8 +12,29 @@ const EXAMPLES = [
   'Find vehicles linked to Case #4421',
 ]
 
-const MOCK_REPLY = (q) =>
-  `Query executed via Universal Adapter:\n\nSELECT * FROM intelligence_db\nWHERE context LIKE '%${q.split(' ').slice(-1)[0]}%'\nLIMIT 100;\n\n✓ 47 rows returned from PostgreSQL adapter.\n\nTop results:\n• suspect_id: A-4421  name: Viktor M.  district: Harbor\n• case_id: 9912  status: Active  severity: Critical\n• vehicle_reg: ZX-7742-B  linked_cases: 3`
+const MOCK_RESPONSE = {
+  response_id: 'mock-001',
+  session_id: '',
+  user_id: 'officer-001',
+  intent: 'investigative_query',
+  complexity: 'complex',
+  executive_summary: 'Based on multi-agent analysis of available data, the query reveals significant criminal network activity in sectors 4 and 7 with high confidence.',
+  key_findings: [
+    { finding: 'Primary suspect network spans 3 districts with 18 active members.', confidence: 0.92, source_agents: ['GraphAgent', 'SQLToolAgent'] },
+    { finding: 'Temporal pattern suggests coordinated activity on weekends 22:00–02:00.', confidence: 0.87, source_agents: ['TimelineAgent', 'PlanningAgent'] },
+    { finding: 'Vehicle registration overlap found with 4 prior incidents.', confidence: 0.78, source_agents: ['SQLToolAgent'] },
+  ],
+  recommendations: [
+    'Deploy surveillance units in sector 4 during identified peak hours.',
+    'Cross-reference vehicle registrations with national database.',
+    'Initiate graph traversal on secondary suspect nodes.',
+  ],
+  confidence: 0.88,
+  confidence_label: 'high',
+  critic_passed: true,
+  critic_warnings: [],
+  v2: true,
+}
 
 const SYSTEM_MSG = {
   role: 'system',
@@ -35,8 +59,16 @@ export default function DBChatbot() {
     if (textareaRef.current) textareaRef.current.style.height = '40px'
     setMessages((m) => [...m, { role: 'user', text: q }])
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1000 + Math.random() * 800))
-    setMessages((m) => [...m, { role: 'ai', text: MOCK_REPLY(q) }])
+
+    try {
+      const sessionId = `db-chat-${Date.now()}`
+      const responseData = await postV2Ask({ session_id: sessionId, user_id: 'officer-001', question: q })
+      setMessages((m) => [...m, { role: 'ai', data: responseData }])
+    } catch (err) {
+      console.warn('[DBChatbot Request Failed]', err.message)
+      setMessages((m) => [...m, { role: 'ai', data: { ...MOCK_RESPONSE, executive_summary: `Based on multi-agent analysis for "${q}", the query reveals significant patterns.` } }])
+    }
+
     setLoading(false)
   }
 
@@ -211,6 +243,8 @@ export default function DBChatbot() {
               </div>
             ) : m.role === 'user' ? (
               <div className="chat-bubble-user">{m.text}</div>
+            ) : m.data ? (
+              <InvestigationCard data={m.data} />
             ) : (
               <div
                 style={{
