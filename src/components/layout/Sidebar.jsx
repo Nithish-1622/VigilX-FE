@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Database, Brain, FlaskConical, MessageSquare,
   GitBranch, Settings, HelpCircle, ChevronLeft, ChevronDown, Shield,
-  Zap, Users, Cpu, BarChart2, Wrench, FolderKanban, DollarSign, TrendingUp, Scale,
+  Zap, Users, Cpu, BarChart2, Wrench, FolderKanban, DollarSign, TrendingUp, Scale, Fingerprint,
 } from 'lucide-react'
 import useAppStore from '../../store/useAppStore'
 
@@ -69,8 +69,24 @@ export default function Sidebar() {
           onClick={() => navigate('/')}
           style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
         >
-          <div style={{ width: 28, height: 28, borderRadius: 3, background: 'rgba(0,200,240,0.08)', border: '1px solid rgba(0,200,240,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <Shield size={13} style={{ color: 'var(--cyan)' }} />
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: '#0a1017', border: '1px solid #00d4ff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flexShrink: 0, position: 'relative', boxShadow: '0 0 8px rgba(0,212,255,0.25)', overflow: 'hidden' }}>
+            <Fingerprint size={10} style={{ color: '#00d4ff', position: 'absolute', top: 3 }} />
+            <svg width="22" height="22" viewBox="0 0 24 24" style={{ position: 'absolute', top: 5 }}>
+              <defs>
+                <linearGradient id="vxGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#475569" />
+                  <stop offset="100%" stopColor="#0f172a" />
+                </linearGradient>
+                <linearGradient id="vxCyan" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#00E5FF" />
+                  <stop offset="100%" stopColor="#0088CC" />
+                </linearGradient>
+              </defs>
+              <polygon points="3,4 12,21 16,21 7,4" fill="url(#vxGrad)" stroke="#1e293b" strokeWidth="0.5" />
+              <polygon points="21,4 12,21 8,21 17,4" fill="url(#vxGrad)" stroke="#1e293b" strokeWidth="0.5" />
+              <polygon points="5,21 12,12 15,12 8,21" fill="url(#vxGrad)" stroke="#1e293b" strokeWidth="0.5" />
+              <polygon points="12,12 21,21 17,21 8,12" fill="url(#vxCyan)" />
+            </svg>
           </div>
           <AnimatePresence>
             {!collapsed && (
