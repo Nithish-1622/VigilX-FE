@@ -16,13 +16,25 @@ const PAGE_TITLES = {
 export default function AIStudio() {
   const [searchParams] = useSearchParams()
   const tabParam = searchParams.get('tab')
+  const subtabParam = searchParams.get('subtab')
   const [tab, setTab] = useState(tabParam || 'v2')
 
   useEffect(() => {
     if (tabParam && tabParam !== tab) setTab(tabParam)
   }, [tabParam])
 
-  const current = PAGE_TITLES[tab] || PAGE_TITLES.v2
+  let current = PAGE_TITLES[tab] || PAGE_TITLES.v2
+
+  if (tab === 'ml') {
+    const subTitles = {
+      telemetry: { label: 'ML Studio — Overview & Telemetry', sub: 'Air-gapped GPU/VRAM hardware metrics & FastAPI status' },
+      datasets: { label: 'ML Studio — Datasets Management', sub: 'Local fine-tuning CSV/JSONL datasets, PII analysis & synthetic augmentation' },
+      jobs: { label: 'ML Studio — Training Pipeline Jobs', sub: 'LoRA/QLoRA fine-tuning queue, live log console & evaluation quality gate' },
+      models: { label: 'ML Studio — Model Registry', sub: 'Registered candidate models, lifecycle stages & active production model' },
+      inference: { label: 'ML Studio — Inference Playground', sub: 'Local LLM single query testing & side-by-side model output benchmark' },
+    }
+    current = subTitles[subtabParam] || subTitles.telemetry
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', padding: '32px 40px' }}>
