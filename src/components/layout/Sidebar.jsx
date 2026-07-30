@@ -24,7 +24,11 @@ const NAV_ITEMS = [
       { icon: Zap, label: 'Multi Agent Orchestration', tab: 'v2', path: '/app/ai-studio?tab=v2' },
       { icon: MessageSquare, label: 'Conversation AI', tab: 'v1', path: '/app/ai-studio?tab=v1' },
       { icon: Users, label: 'Agents Fleet', tab: 'agents', path: '/app/ai-studio?tab=agents' },
-      { icon: Cpu, label: 'ML Studio', tab: 'ml', path: '/app/ai-studio?tab=ml' },
+      { icon: Activity, label: 'ML Overview', tab: 'ml', subtab: 'telemetry', path: '/app/ai-studio?tab=ml&subtab=telemetry' },
+      { icon: Database, label: 'ML Datasets', tab: 'ml', subtab: 'datasets', path: '/app/ai-studio?tab=ml&subtab=datasets' },
+      { icon: Play, label: 'ML Training Jobs', tab: 'ml', subtab: 'jobs', path: '/app/ai-studio?tab=ml&subtab=jobs' },
+      { icon: Brain, label: 'ML Model Registry', tab: 'ml', subtab: 'models', path: '/app/ai-studio?tab=ml&subtab=models' },
+      { icon: Sparkles, label: 'ML Inference Playground', tab: 'ml', subtab: 'inference', path: '/app/ai-studio?tab=ml&subtab=inference' },
     ],
   },
   {
@@ -183,9 +187,11 @@ function SidebarItem({ item, collapsed }) {
             >
               {children.map((child) => {
                 const raw = searchParams.get('tab')
+                const rawSub = searchParams.get('subtab')
                 const def = path.includes('data-studio') ? 'connectors' : path.includes('ai-studio') ? 'v2' : 'experiment'
                 const cur = raw || def
-                const isActive = isParentActive && cur === child.tab
+                const curSub = rawSub || (cur === 'ml' ? 'telemetry' : null)
+                const isActive = isParentActive && cur === child.tab && (!child.subtab || curSub === child.subtab)
                 const CI = child.icon
                 return (
                   <NavLink key={child.path} to={child.path} style={{ textDecoration: 'none' }}>
