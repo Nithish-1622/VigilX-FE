@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, Bell, ChevronDown, X, Sun, Moon, LogOut, Shield } from 'lucide-react'
@@ -11,6 +11,7 @@ export default function Topbar() {
   const [searchFocused, setSearchFocused] = useState(false)
   const [showNotifs, setShowNotifs] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const searchInputRef = useRef(null)
 
   const notifications = useAppStore((s) => s.notifications)
   const markAllRead   = useAppStore((s) => s.markAllRead)
@@ -19,6 +20,18 @@ export default function Topbar() {
 
   const { user, logout } = useAuthStore()
   const unread = (notifications || []).filter((n) => !n.read).length
+
+  // Keyboard binding: Ctrl+K / Cmd+K to focus search input
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        searchInputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   const handleSignOut = async () => {
     await logout()
@@ -41,16 +54,17 @@ export default function Topbar() {
       style={{ height: 'var(--topbar-height)', display: 'flex', alignItems: 'center', gap: 10, padding: '0 18px', flexShrink: 0, position: 'relative', zIndex: 40 }}
     >
       {/* Search */}
-      <div style={{ position: 'relative', width: 280, flexShrink: 0 }}>
+      <div style={{ position: 'relative', width: 360, flexShrink: 0 }}>
         <Search size={11} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)', pointerEvents: 'none' }} />
         <input
+          ref={searchInputRef}
           value={searchVal}
           onChange={(e) => setSearchVal(e.target.value)}
           onFocus={() => setSearchFocused(true)}
           onBlur={() => setSearchFocused(false)}
           placeholder="Search cases, suspects, intel…"
           style={{
-            width: '100%', height: 30, paddingLeft: 28, paddingRight: searchVal ? 26 : 10,
+            width: '100%', height: 30, paddingLeft: 28, paddingRight: searchVal ? 26 : 56,
             borderRadius: 3, fontSize: 12, color: 'var(--text-primary)',
             background: searchFocused ? 'var(--bg-row)' : 'var(--bg-panel)',
             border: `1px solid ${searchFocused ? 'var(--cyan)' : 'var(--border-dim)'}`,
@@ -59,10 +73,29 @@ export default function Topbar() {
             fontFamily: 'inherit',
           }}
         />
-        {searchVal && (
+        {searchVal ? (
           <button onClick={() => setSearchVal('')} style={{ position: 'absolute', right: 7, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             <X size={10} />
           </button>
+        ) : (
+          <kbd style={{
+            position: 'absolute',
+            right: 7,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            fontFamily: 'var(--mono)',
+            fontSize: 9,
+            fontWeight: 600,
+            color: 'var(--text-tertiary)',
+            background: 'var(--bg-row)',
+            border: '1px solid var(--border-dim)',
+            borderRadius: 2,
+            padding: '1px 5px',
+            pointerEvents: 'none',
+            letterSpacing: '0.04em',
+          }}>
+            Ctrl K
+          </kbd>
         )}
       </div>
 
