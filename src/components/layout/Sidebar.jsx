@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Database, Brain, FlaskConical, MessageSquare,
   GitBranch, Settings, HelpCircle, ChevronLeft, ChevronDown, Shield,
   Zap, Users, Cpu, BarChart2, Wrench, FolderKanban, DollarSign, TrendingUp, Scale, Fingerprint,
+  Activity, Play, Sparkles
 } from 'lucide-react'
 import useAppStore from '../../store/useAppStore'
 
@@ -24,11 +25,16 @@ const NAV_ITEMS = [
       { icon: Zap, label: 'Multi Agent Orchestration', tab: 'v2', path: '/app/ai-studio?tab=v2' },
       { icon: MessageSquare, label: 'Conversation AI', tab: 'v1', path: '/app/ai-studio?tab=v1' },
       { icon: Users, label: 'Agents Fleet', tab: 'agents', path: '/app/ai-studio?tab=agents' },
-      { icon: Activity, label: 'ML Overview', tab: 'ml', subtab: 'telemetry', path: '/app/ai-studio?tab=ml&subtab=telemetry' },
-      { icon: Database, label: 'ML Datasets', tab: 'ml', subtab: 'datasets', path: '/app/ai-studio?tab=ml&subtab=datasets' },
-      { icon: Play, label: 'ML Training Jobs', tab: 'ml', subtab: 'jobs', path: '/app/ai-studio?tab=ml&subtab=jobs' },
-      { icon: Brain, label: 'ML Model Registry', tab: 'ml', subtab: 'models', path: '/app/ai-studio?tab=ml&subtab=models' },
-      { icon: Sparkles, label: 'ML Inference Playground', tab: 'ml', subtab: 'inference', path: '/app/ai-studio?tab=ml&subtab=inference' },
+      {
+        icon: Cpu, label: 'ML Studio', tab: 'ml', path: '/app/ai-studio?tab=ml',
+        children: [
+          { icon: Activity, label: 'Overview & Telemetry', tab: 'ml', subtab: 'telemetry', path: '/app/ai-studio?tab=ml&subtab=telemetry' },
+          { icon: Database, label: 'Datasets', tab: 'ml', subtab: 'datasets', path: '/app/ai-studio?tab=ml&subtab=datasets' },
+          { icon: Play, label: 'Training Jobs', tab: 'ml', subtab: 'jobs', path: '/app/ai-studio?tab=ml&subtab=jobs' },
+          { icon: Brain, label: 'Model Registry', tab: 'ml', subtab: 'models', path: '/app/ai-studio?tab=ml&subtab=models' },
+          { icon: Sparkles, label: 'Inference Playground', tab: 'ml', subtab: 'inference', path: '/app/ai-studio?tab=ml&subtab=inference' },
+        ],
+      },
     ],
   },
   {
@@ -201,27 +207,9 @@ function SidebarItem({ item, collapsed }) {
               initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.16 }}
               style={{ overflow: 'hidden', marginLeft: 12, paddingLeft: 10, borderLeft: '1px solid var(--border-dim)', marginTop: 1, marginBottom: 2 }}
             >
-              {children.map((child) => {
-                const raw = searchParams.get('tab')
-                const rawSub = searchParams.get('subtab')
-                const def = path.includes('data-studio') ? 'connectors' : path.includes('ai-studio') ? 'v2' : 'experiment'
-                const cur = raw || def
-                const curSub = rawSub || (cur === 'ml' ? 'telemetry' : null)
-                const isActive = isParentActive && cur === child.tab && (!child.subtab || curSub === child.subtab)
-                const CI = child.icon
-                return (
-                  <NavLink key={child.path} to={child.path} style={{ textDecoration: 'none' }}>
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 7px', borderRadius: 2, marginBottom: 1, background: isActive ? 'rgba(0,200,240,0.06)' : 'transparent', border: `1px solid ${isActive ? 'rgba(0,200,240,0.1)' : 'transparent'}`, transition: 'all 0.1s', cursor: 'pointer' }}
-                      onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-raised)' }}
-                      onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
-                    >
-                      <CI size={11} style={{ color: isActive ? 'var(--cyan)' : 'var(--text-tertiary)', flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, color: isActive ? 'var(--cyan)' : 'var(--text-secondary)', fontWeight: isActive ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{child.label}</span>
-                    </div>
-                  </NavLink>
-                )
-              })}
+              {children.map((child) => (
+                <SidebarChildItem key={child.path} child={child} isParentActive={isParentActive} path={path} searchParams={searchParams} />
+              ))}
             </motion.div>
           )}
         </AnimatePresence>
@@ -246,6 +234,123 @@ function SidebarItem({ item, collapsed }) {
           )}
         </div>
       )}
+    </NavLink>
+  )
+}
+
+function SidebarChildItem({ child, isParentActive, path, searchParams }) {
+  const navigate = useNavigate()
+  const raw = searchParams.get('tab')
+  const rawSub = searchParams.get('subtab')
+  const def = path.includes('data-studio') ? 'connectors' : path.includes('ai-studio') ? 'v2' : 'experiment'
+  const cur = raw || def
+  const curSub = rawSub || (cur === 'ml' ? 'telemetry' : null)
+  const isTabActive = isParentActive && cur === child.tab
+
+  if (child.children?.length) {
+    const [subExpanded, setSubExpanded] = useState(isTabActive)
+
+    useEffect(() => {
+      if (isTabActive) setSubExpanded(true)
+    }, [isTabActive])
+
+    const CI = child.icon
+
+    return (
+      <div style={{ marginBottom: 2 }}>
+        <div
+          onClick={() => {
+            if (!isTabActive) navigate(child.path)
+            setSubExpanded(!subExpanded)
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            padding: '5px 7px',
+            borderRadius: 2,
+            marginBottom: 1,
+            background: isTabActive ? 'rgba(139,92,246,0.08)' : 'transparent',
+            border: `1px solid ${isTabActive ? 'rgba(139,92,246,0.15)' : 'transparent'}`,
+            transition: 'all 0.1s',
+            cursor: 'pointer',
+          }}
+          onMouseEnter={(e) => { if (!isTabActive) e.currentTarget.style.background = 'var(--bg-raised)' }}
+          onMouseLeave={(e) => { if (!isTabActive) e.currentTarget.style.background = 'transparent' }}
+        >
+          <CI size={11} style={{ color: isTabActive ? 'var(--purple)' : 'var(--text-tertiary)', flexShrink: 0 }} />
+          <span style={{ flex: 1, fontSize: 11, color: isTabActive ? 'var(--text-primary)' : 'var(--text-secondary)', fontWeight: isTabActive ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {child.label}
+          </span>
+          <motion.div animate={{ rotate: subExpanded ? 180 : 0 }} transition={{ duration: 0.16 }} style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>
+            <ChevronDown size={10} />
+          </motion.div>
+        </div>
+
+        <AnimatePresence>
+          {subExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.14 }}
+              style={{ overflow: 'hidden', marginLeft: 10, paddingLeft: 8, borderLeft: '1px solid var(--border-dim)', marginTop: 1 }}
+            >
+              {child.children.map((sub) => {
+                const isSubActive = isTabActive && curSub === sub.subtab
+                const SubIcon = sub.icon
+                return (
+                  <NavLink key={sub.path} to={sub.path} style={{ textDecoration: 'none' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '4px 6px',
+                        borderRadius: 2,
+                        marginBottom: 1,
+                        background: isSubActive ? 'rgba(0,200,240,0.08)' : 'transparent',
+                        border: `1px solid ${isSubActive ? 'rgba(0,200,240,0.15)' : 'transparent'}`,
+                        transition: 'all 0.1s',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={(e) => { if (!isSubActive) e.currentTarget.style.background = 'var(--bg-raised)' }}
+                      onMouseLeave={(e) => { if (!isSubActive) e.currentTarget.style.background = 'transparent' }}
+                    >
+                      <SubIcon size={10} style={{ color: isSubActive ? 'var(--cyan)' : 'var(--text-tertiary)', flexShrink: 0 }} />
+                      <span style={{ fontSize: 10, color: isSubActive ? 'var(--cyan)' : 'var(--text-secondary)', fontWeight: isSubActive ? 600 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {sub.label}
+                      </span>
+                    </div>
+                  </NavLink>
+                )
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    )
+  }
+
+  const isActive = isTabActive && (!child.subtab || curSub === child.subtab)
+  const CI = child.icon
+  return (
+    <NavLink to={child.path} style={{ textDecoration: 'none' }}>
+      <div
+        style={{
+          display: 'flex', alignItems: 'center', gap: 7, padding: '5px 7px', borderRadius: 2, marginBottom: 1,
+          background: isActive ? 'rgba(0,200,240,0.06)' : 'transparent',
+          border: `1px solid ${isActive ? 'rgba(0,200,240,0.1)' : 'transparent'}`,
+          transition: 'all 0.1s', cursor: 'pointer',
+        }}
+        onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = 'var(--bg-raised)' }}
+        onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent' }}
+      >
+        <CI size={11} style={{ color: isActive ? 'var(--cyan)' : 'var(--text-tertiary)', flexShrink: 0 }} />
+        <span style={{ fontSize: 11, color: isActive ? 'var(--cyan)' : 'var(--text-secondary)', fontWeight: isActive ? 500 : 400, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {child.label}
+        </span>
+      </div>
     </NavLink>
   )
 }
