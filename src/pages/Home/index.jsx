@@ -140,7 +140,12 @@ export default function Home() {
             }}
           >
             <Clock size={12} style={{ color: 'var(--accent-cyan)' }} />
-            Thu, 24 Jul 2026
+            {new Date().toLocaleDateString('en-GB', {
+              weekday: 'short',
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })}
           </div>
           <button
             onClick={triggerRefresh}
