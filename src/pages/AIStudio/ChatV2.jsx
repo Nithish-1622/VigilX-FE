@@ -148,6 +148,7 @@ function PipelineDAG({ pipeline }) {
 }
 
 import InvestigationCard from '../../components/InvestigationCard'
+import FormattedAIResponse from '../../components/FormattedAIResponse'
 
 
 
@@ -243,7 +244,7 @@ export default function ChatV2() {
               ? <div className="chat-bubble-user">{m.text}</div>
               : m.data
                 ? <InvestigationCard data={m.data} />
-                : <div className="chat-bubble-ai">{m.text}</div>
+                : <div className="chat-bubble-ai" style={{ width: '100%', maxWidth: 720 }}><FormattedAIResponse content={m.text} /></div>
             }
           </motion.div>
         ))}

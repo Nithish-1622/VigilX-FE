@@ -4,6 +4,8 @@ import { Send, Database, Loader2, Trash2 } from 'lucide-react'
 
 import { postV2Ask } from '../../api/vigilx'
 import InvestigationCard from '../../components/InvestigationCard'
+import { sanitizeAIResponse } from '../../utils/sanitizeResponse'
+import FormattedAIResponse from '../../components/FormattedAIResponse'
 
 const EXAMPLES = [
   'Show all tables related to narcotics',
@@ -62,7 +64,8 @@ export default function DBChatbot() {
 
     try {
       const sessionId = `db-chat-${Date.now()}`
-      const responseData = await postV2Ask({ session_id: sessionId, user_id: 'officer-001', question: q })
+      const rawData = await postV2Ask({ session_id: sessionId, user_id: 'officer-001', question: q })
+      const responseData = sanitizeAIResponse(rawData)
       setMessages((m) => [...m, { role: 'ai', data: responseData }])
     } catch (err) {
       console.warn('[DBChatbot Request Failed]', err.message)
@@ -239,7 +242,7 @@ export default function DBChatbot() {
                   maxWidth: 520,
                 }}
               >
-                {m.text}
+                <FormattedAIResponse content={m.text} />
               </div>
             ) : m.role === 'user' ? (
               <div className="chat-bubble-user">{m.text}</div>
@@ -252,21 +255,11 @@ export default function DBChatbot() {
                   borderRadius: '3px 10px 10px 10px',
                   background: 'var(--bg-primary)',
                   border: '1px solid var(--border-subtle)',
-                  maxWidth: 520,
+                  maxWidth: 640,
+                  width: '100%',
                 }}
               >
-                <pre
-                  style={{
-                    fontFamily: 'JetBrains Mono, Fira Code, monospace',
-                    fontSize: 11,
-                    color: 'var(--text-secondary)',
-                    whiteSpace: 'pre-wrap',
-                    lineHeight: 1.7,
-                    margin: 0,
-                  }}
-                >
-                  {m.text}
-                </pre>
+                <FormattedAIResponse content={m.text} />
               </div>
             )}
           </motion.div>

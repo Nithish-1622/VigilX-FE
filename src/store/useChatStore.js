@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { postV1Ask, postV2Ask } from '../api/vigilx'
+import { sanitizeAIResponse } from '../utils/sanitizeResponse'
 
 const MOCK_RESPONSE = {
   response_id: 'mock-001',
@@ -80,6 +81,9 @@ const useChatStore = create((set, get) => ({
       if (!answerText) {
         answerText = typeof data === 'string' ? data : 'No response text received.'
       }
+
+      // Sanitize and strip HTTP status lines or headers if present
+      answerText = sanitizeAIResponse(answerText)
     } catch (err) {
       console.warn('[V1 Chat Request Info]', err.message)
       answerText = `VigilX V1 AI: Synthesized response for "${text}". Search completed across intelligence records.`
@@ -137,6 +141,9 @@ const useChatStore = create((set, get) => ({
     } catch {
       // use mock
     }
+
+    // Sanitize response object fields
+    responseData = sanitizeAIResponse(responseData)
 
     const aiMsg = { id: Date.now() + 1, role: 'ai', data: responseData, ts: new Date() }
     set((s) => ({
