@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Send, Bot, Trash2, Loader2 } from 'lucide-react'
 import useChatStore from '../../store/useChatStore'
+import FormattedAIResponse from '../../components/FormattedAIResponse'
 
 const STARTERS = [
   'Who are the top suspects in the narcotics case?',
@@ -243,9 +244,13 @@ export default function ChatV1() {
                 {m.role === 'user' ? 'You' : 'VigilX V1'}
               </span>
             </div>
-            <div className={m.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'}>
-              {m.text}
-            </div>
+            {m.role === 'user' ? (
+              <div className="chat-bubble-user">{m.text}</div>
+            ) : (
+              <div className="chat-bubble-ai" style={{ width: '100%', maxWidth: 720 }}>
+                <FormattedAIResponse content={m.text} />
+              </div>
+            )}
           </motion.div>
         ))}
 

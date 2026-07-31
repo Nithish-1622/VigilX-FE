@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
+import { cleanText } from '../utils/sanitizeResponse'
+import FormattedAIResponse from './FormattedAIResponse'
 
 function ConfBar({ value, color }) {
   return (
@@ -43,7 +45,7 @@ export default function InvestigationCard({ data }) {
         {/* Summary */}
         <div style={{ marginBottom: 12 }}>
           <p className="section-label" style={{ marginBottom: 5 }}>Executive Summary</p>
-          <p style={{ fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.6 }}>{data.executive_summary}</p>
+          <FormattedAIResponse content={data?.executive_summary || ''} />
         </div>
 
         {/* Key findings table */}
