@@ -10,19 +10,52 @@ import {
 } from 'lucide-react'
 import { djangoApi } from '../../api/vigilx'
 
-const SUITE_CATEGORIES = []
+const SUITE_CATEGORIES = [
+  { id: 'investigation', label: 'INVESTIGATION', subtitle: 'Search, Resolution, Case Files', icon: Search, count: 6 },
+  { id: 'analytics', label: 'ANALYTICS', subtitle: 'Trends, MO, Spatial', icon: Activity, count: 3 },
+  { id: 'profiling', label: 'PROFILING', subtitle: 'Threat Score, Recidivism', icon: Shield, count: 2 },
+  { id: 'finance', label: 'FINANCE', subtitle: 'Money Flow, AML', icon: DollarSign, count: 2 },
+  { id: 'forecasting', label: 'FORECASTING', subtitle: 'Hotspots, Gang Alerts', icon: Target, count: 2 },
+  { id: 'xai', label: 'XAI & AUDIT', subtitle: 'LLM Reasoning, Logs', icon: Cpu, count: 2 }
+]
 
 export default function ToolsStudio() {
   const [searchParams, setSearchParams] = useSearchParams()
   const activeCategory = searchParams.get('tab') || 'investigation'
 
   // Dynamic Parameter Controls
-  const [firId, setFirId] = useState('101')
   const [accusedId, setAccusedId] = useState('1')
-  const [accountNumber, setAccountNumber] = useState('1234567890')
 
   // Feature Selection & Pre-Loaded Analytics State
   const [selectedFeature, setSelectedFeature] = useState(null)
+  
+  // Live Data State
+  const [liveData, setLiveData] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!selectedFeature) return
+    const fetchLive = async () => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        let finalPath = selectedFeature.path
+        finalPath = finalPath.replace('{fir_id}', accusedId || '1')
+        finalPath = finalPath.replace('{accused_id}', accusedId || '1')
+        finalPath = finalPath.replace('{account_number}', accusedId || '1')
+        finalPath = finalPath.replace('{query_id}', accusedId || '1')
+        
+        const res = await djangoApi.get(finalPath)
+        setLiveData(res.data)
+      } catch (err) {
+        setError(err.message || 'Network Error')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchLive()
+  }, [selectedFeature, accusedId])
 
   // Auto-select first feature of active category on tab load so content is pre-loaded out-of-the-box
   useEffect(() => {
@@ -34,6 +67,16 @@ export default function ToolsStudio() {
 
   const handleCategoryChange = (id) => {
     setSearchParams({ tab: id })
+  }
+
+  const getToolUrl = (path) => {
+    let finalPath = path
+    finalPath = finalPath.replace('{fir_id}', accusedId || '1')
+    finalPath = finalPath.replace('{accused_id}', accusedId || '1')
+    finalPath = finalPath.replace('{account_number}', accusedId || '1')
+    finalPath = finalPath.replace('{query_id}', accusedId || '1')
+    const baseUrl = import.meta.env.VITE_DJANGO_API_URL || 'http://localhost:8000'
+    return `${baseUrl}${finalPath}`
   }
 
   return (
@@ -60,51 +103,13 @@ export default function ToolsStudio() {
         {/* Global Parameter Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(10, 14, 22, 0.92)', border: '1px solid rgba(0, 200, 240, 0.25)', borderRadius: 10, padding: '8px 16px', boxShadow: '0 0 20px rgba(0, 200, 240, 0.15)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#00C8F0', fontWeight: 800 }}>FIR:</span>
-            <input type="text" value={firId} onChange={(e) => setFirId(e.target.value)} style={{ width: 44, background: '#06080C', border: '1px solid rgba(0, 200, 240, 0.4)', borderRadius: 4, color: '#FFF', fontSize: 11, textAlign: 'center', padding: '3px 4px', fontWeight: 700 }} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#A855F7', fontWeight: 800 }}>SUSPECT ID:</span>
-            <input type="text" value={accusedId} onChange={(e) => setAccusedId(e.target.value)} style={{ width: 44, background: '#06080C', border: '1px solid rgba(168, 85, 247, 0.4)', borderRadius: 4, color: '#FFF', fontSize: 11, textAlign: 'center', padding: '3px 4px', fontWeight: 700 }} />
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#10B981', fontWeight: 800 }}>ACC:</span>
-            <input type="text" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} style={{ width: 95, background: '#06080C', border: '1px solid rgba(16, 185, 129, 0.4)', borderRadius: 4, color: '#FFF', fontSize: 11, textAlign: 'center', padding: '3px 4px', fontWeight: 700 }} />
+            <input type="text" value={accusedId} onChange={(e) => setAccusedId(e.target.value)} style={{ width: 80, background: '#06080C', border: '1px solid rgba(168, 85, 247, 0.4)', borderRadius: 4, color: '#FFF', fontSize: 11, textAlign: 'center', padding: '3px 4px', fontWeight: 700 }} />
           </div>
         </div>
       </div>
 
-      {/* ── Sub-Suite Category Navigation ──────────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 12, marginBottom: 26 }}>
-        {SUITE_CATEGORIES.map((c) => {
-          const Icon = c.icon
-          const isActive = activeCategory === c.id
-          return (
-            <button
-              key={c.id}
-              onClick={() => handleCategoryChange(c.id)}
-              style={{
-                display: 'flex', flexDirection: 'column', gap: 6, padding: '14px 16px',
-                background: isActive ? 'linear-gradient(135deg, rgba(0, 200, 240, 0.16), rgba(139, 92, 246, 0.16))' : 'rgba(10, 14, 22, 0.8)',
-                border: `1px solid ${isActive ? '#00C8F0' : 'rgba(255, 255, 255, 0.09)'}`,
-                borderRadius: 10, cursor: 'pointer', transition: 'all 0.22s ease', textAlign: 'left',
-                boxShadow: isActive ? '0 0 24px rgba(0, 200, 240, 0.3)' : 'none'
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                <Icon size={18} style={{ color: isActive ? '#00C8F0' : '#94A3B8' }} />
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, fontWeight: 800, color: isActive ? '#00C8F0' : '#64748B', background: 'rgba(255,255,255,0.06)', padding: '2px 6px', borderRadius: 4 }}>
-                  {c.count}
-                </span>
-              </div>
-              <div>
-                <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? '#FFFFFF' : '#CBD5E1', display: 'block' }}>{c.label}</span>
-                <span style={{ fontSize: 10, color: '#64748B', marginTop: 2, display: 'block' }}>{c.subtitle}</span>
-              </div>
-            </button>
-          )
-        })}
-      </div>
+
 
       {/* ── Main Feature Intelligence Workspace ───────────────────────────── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 24 }}>
@@ -139,7 +144,7 @@ export default function ToolsStudio() {
                     </div>
 
                     <a
-                      href={`http://127.0.0.1:8000${feat.path}`}
+                      href={getToolUrl(feat.path)}
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -192,14 +197,39 @@ export default function ToolsStudio() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                   <span style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF' }}>{selectedFeature.name}</span>
                   <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 800, color: '#00C8F0', background: 'rgba(0, 200, 240, 0.15)', padding: '4px 10px', borderRadius: 12, border: '1px solid rgba(0, 200, 240, 0.3)' }}>
-                    MODULE READY
+                    {isLoading ? 'FETCHING DATA...' : 'MODULE READY'}
                   </span>
                 </div>
                 <p style={{ fontSize: 12, color: '#94A3B8', margin: 0, lineHeight: 1.45 }}>{selectedFeature.description}</p>
               </div>
 
-              {/* Pre-Loaded Visual Intelligence Widget Component */}
-              <PreLoadedVisualWidget category={activeCategory} feature={selectedFeature} firId={firId} accusedId={accusedId} accountNumber={accountNumber} />
+              {isLoading ? (
+                <div style={{ padding: 40, textAlign: 'center', color: '#00C8F0' }}>
+                  <RefreshCw size={24} style={{ animation: 'spin 1s linear infinite', marginBottom: 10 }} />
+                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>Executing Intelligence Query...</div>
+                </div>
+              ) : liveData ? (
+                <div style={{ background: '#06080C', border: '1px solid rgba(0, 200, 240, 0.3)', borderRadius: 10, padding: 16, overflowX: 'auto', flex: 1 }}>
+                  <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <Database size={12} style={{ color: '#00C8F0' }} /> INTELLIGENCE RESULTS
+                  </div>
+                  <DynamicDataViewer data={liveData} />
+                </div>
+              ) : (
+                <>
+                  {error && (
+                    <div style={{ padding: '12px 16px', color: '#F87171', background: 'rgba(239, 68, 68, 0.08)', borderRadius: 8, border: '1px solid rgba(239, 68, 68, 0.2)', fontSize: 12, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div>
+                        <strong>Connection Error:</strong> {error}
+                        <div style={{ marginTop: 4, color: '#94A3B8' }}>Backend may not be running. Displaying static preview instead.</div>
+                      </div>
+                    </div>
+                  )}
+                  {/* Pre-Loaded Visual Intelligence Widget Component */}
+                  <PreLoadedVisualWidget category={activeCategory} feature={selectedFeature} firId={accusedId} accusedId={accusedId} accountNumber={accusedId} />
+                </>
+              )}
 
             </div>
           ) : (
@@ -213,6 +243,53 @@ export default function ToolsStudio() {
       </div>
     </div>
   )
+}
+
+// ─── Dynamic Data Viewer ───────────────────────────────────────────────────────
+function DynamicDataViewer({ data }) {
+  if (data === null || data === undefined) return <span style={{ color: '#64748B' }}>N/A</span>;
+  
+  if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
+    return <span style={{ color: '#E2E8F0', fontWeight: 600 }}>{String(data)}</span>;
+  }
+
+  if (Array.isArray(data)) {
+    if (data.length === 0) return <span style={{ color: '#64748B' }}>No results</span>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {data.map((item, i) => (
+          <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: 14 }}>
+            <DynamicDataViewer data={item} />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (typeof data === 'object') {
+    return (
+      <div style={{ borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
+          <tbody>
+            {Object.entries(data).map(([k, v], i) => (
+              <tr key={k} style={{ borderBottom: i !== Object.keys(data).length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
+                <td style={{ padding: '10px 14px', width: '35%', verticalAlign: 'top', background: 'rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span style={{ fontSize: 10, color: '#00C8F0', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {k.replace(/_/g, ' ')}
+                  </span>
+                </td>
+                <td style={{ padding: '10px 14px', color: '#F8FAFC', background: 'rgba(6, 8, 12, 0.4)' }}>
+                  <DynamicDataViewer data={v} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+  
+  return null;
 }
 
 // ─── Pre-Loaded Visual Component Renderer ──────────────────────────────────────
