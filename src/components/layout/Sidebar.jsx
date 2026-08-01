@@ -23,7 +23,7 @@ const NAV_ITEMS = [
     icon: Brain, label: 'AI Studio', path: '/app/ai-studio',
     children: [
       { icon: Zap, label: 'Multi Agent Orchestration', tab: 'v2', path: '/app/ai-studio?tab=v2' },
-      { icon: MessageSquare, label: 'Conversation AI', tab: 'v1', path: '/app/ai-studio?tab=v1' },
+      //{ icon: MessageSquare, label: 'Conversation AI', tab: 'v1', path: '/app/ai-studio?tab=v1' },
       { icon: Users, label: 'Agents Fleet', tab: 'agents', path: '/app/ai-studio?tab=agents' },
       {
         icon: Cpu, label: 'ML Studio', tab: 'ml', path: '/app/ai-studio?tab=ml',
