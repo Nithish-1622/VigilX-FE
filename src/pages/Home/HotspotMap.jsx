@@ -425,14 +425,7 @@ export default function HotspotMap() {
               {
                 id: 'osm',
                 type: 'raster',
-                source: 'osm-tiles',
-                paint: {
-                  'raster-brightness-min': 0,
-                  'raster-brightness-max': 0.12,
-                  'raster-saturation': -0.88,
-                  'raster-contrast': 0.35,
-                  'raster-opacity': 0.78,
-                },
+                source: 'osm-tiles'
               },
             ],
           },
@@ -507,7 +500,7 @@ export default function HotspotMap() {
 
             <svg width="20" height="26" viewBox="0 0 24 30" fill="none" style="position: relative; z-index: 2; filter: drop-shadow(0 2px 6px ${color}90);">
               <path d="M12 0C5.37 0 0 5.37 0 12C0 21 12 30 12 30C12 30 24 21 24 12C24 5.37 18.63 0 12 0Z" fill="${color}"/>
-              <circle cx="12" cy="11" r="5" fill="#06080C"/>
+              <circle cx="12" cy="11" r="5" fill="var(--bg-panel)"/>
             </svg>
           </div>
         `
@@ -679,7 +672,7 @@ export default function HotspotMap() {
           justifyContent: 'space-between',
           padding: '10px 14px',
           borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          background: '#04060A',
+          background: 'var(--bg-canvas)',
           gap: 10,
           flexShrink: 0,
         }}
@@ -688,10 +681,10 @@ export default function HotspotMap() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <ShieldAlert size={16} style={{ color: '#00C8F0' }} />
           <div>
-            <span style={{ fontSize: 12, fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.04em', display: 'block' }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '0.04em', display: 'block' }}>
               KARNATAKA STATE POLICE (KSP) HOTSPOT & LIVE GPS MAP
             </span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#94A3B8' }}>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-secondary)' }}>
               High-Precision Verified Stations & Real-Time Telemetry
             </span>
           </div>
@@ -720,7 +713,7 @@ export default function HotspotMap() {
             {isLiveTracking ? 'LIVE GPS TRACKING: ON' : 'LIVE TRACKING: PAUSED'}
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--mono)', fontSize: 9, color: '#64748B' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>
             <Activity size={12} style={{ color: '#10B981' }} />
             <span>PING: {lastPingTime}</span>
           </div>
@@ -735,7 +728,7 @@ export default function HotspotMap() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '6px 14px',
-          background: '#070A10',
+          background: 'var(--bg-panel)',
           borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
           gap: 8,
           flexShrink: 0,
@@ -768,7 +761,7 @@ export default function HotspotMap() {
 
         {/* Search Bar */}
         <div style={{ position: 'relative', width: 180 }}>
-          <Search size={11} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: '#64748B' }} />
+          <Search size={11} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-tertiary)' }} />
           <input
             type="text"
             placeholder="Search location/station..."
@@ -780,7 +773,7 @@ export default function HotspotMap() {
               borderRadius: 4,
               background: 'rgba(15, 23, 42, 0.8)',
               border: '1px solid rgba(255, 255, 255, 0.12)',
-              color: '#FFFFFF',
+              color: 'var(--text-primary)',
               fontSize: 10,
               fontFamily: 'var(--mono)',
               outline: 'none',
@@ -840,41 +833,41 @@ export default function HotspotMap() {
               </span>
               <button
                 onClick={() => setSelected(null)}
-                style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
               >
                 ×
               </button>
             </div>
 
-            <p style={{ fontSize: 13, fontWeight: 800, color: '#FFFFFF', margin: '2px 0 4px 0' }}>{selected.label}</p>
-            <p style={{ fontSize: 10, color: '#94A3B8', margin: '0 0 6px 0' }}>{selected.address}</p>
+            <p style={{ fontSize: 13, fontWeight: 800, color: 'var(--text-primary)', margin: '2px 0 4px 0' }}>{selected.label}</p>
+            <p style={{ fontSize: 10, color: 'var(--text-secondary)', margin: '0 0 6px 0' }}>{selected.address}</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8, background: 'rgba(0, 0, 0, 0.4)', padding: 6, borderRadius: 4 }}>
               <div>
-                <span style={{ fontSize: 8, color: '#64748B', display: 'block' }}>DISTRICT</span>
+                <span style={{ fontSize: 8, color: 'var(--text-tertiary)', display: 'block' }}>DISTRICT</span>
                 <span style={{ fontSize: 10, color: '#00C8F0', fontWeight: 700 }}>{selected.district}</span>
               </div>
               <div>
-                <span style={{ fontSize: 8, color: '#64748B', display: 'block' }}>TYPE</span>
+                <span style={{ fontSize: 8, color: 'var(--text-tertiary)', display: 'block' }}>TYPE</span>
                 <span style={{ fontSize: 10, color: '#E2E8F0', fontWeight: 700 }}>{selected.type}</span>
               </div>
               <div>
-                <span style={{ fontSize: 8, color: '#64748B', display: 'block' }}>GPS LATITUDE</span>
+                <span style={{ fontSize: 8, color: 'var(--text-tertiary)', display: 'block' }}>GPS LATITUDE</span>
                 <span style={{ fontSize: 10, color: '#10B981', fontFamily: 'var(--mono)' }}>{selected.lat}° N</span>
               </div>
               <div>
-                <span style={{ fontSize: 8, color: '#64748B', display: 'block' }}>GPS LONGITUDE</span>
+                <span style={{ fontSize: 8, color: 'var(--text-tertiary)', display: 'block' }}>GPS LONGITUDE</span>
                 <span style={{ fontSize: 10, color: '#10B981', fontFamily: 'var(--mono)' }}>{selected.lon}° E</span>
               </div>
               {selected.speed && (
                 <div>
-                  <span style={{ fontSize: 8, color: '#64748B', display: 'block' }}>SPEED</span>
+                  <span style={{ fontSize: 8, color: 'var(--text-tertiary)', display: 'block' }}>SPEED</span>
                   <span style={{ fontSize: 10, color: '#F59E0B', fontFamily: 'var(--mono)' }}>{selected.speed}</span>
                 </div>
               )}
               {selected.status && (
                 <div>
-                  <span style={{ fontSize: 8, color: '#64748B', display: 'block' }}>STATUS</span>
+                  <span style={{ fontSize: 8, color: 'var(--text-tertiary)', display: 'block' }}>STATUS</span>
                   <span style={{ fontSize: 9, color: '#00E5FF', fontWeight: 800 }}>{selected.status}</span>
                 </div>
               )}
@@ -936,7 +929,7 @@ export default function HotspotMap() {
           justifyContent: 'space-between',
           padding: '6px 14px',
           borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-          background: '#04060A',
+          background: 'var(--bg-canvas)',
           flexShrink: 0,
         }}
       >
@@ -957,7 +950,7 @@ export default function HotspotMap() {
           </div>
         </div>
 
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#64748B' }}>
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--text-tertiary)' }}>
           STATIONS: {filteredStations.length} | ACTIVE UNITS: {filteredUnits.length}
         </div>
       </div>
@@ -977,7 +970,7 @@ function FallbackMap({ stations, units, selected, onSelect, isLiveTracking }) {
   const toY = (lat) => pad + (1 - (lat - minLat) / (maxLat - minLat)) * (H - pad * 2)
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ background: '#04060A' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ background: 'var(--bg-canvas)' }}>
       {/* Grid Lines */}
       {Array.from({ length: 7 }).map((_, i) => (
         <line

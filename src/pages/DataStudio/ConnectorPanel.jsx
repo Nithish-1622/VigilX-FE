@@ -165,7 +165,7 @@ export default function ConnectorPanel() {
             <Loader2 size={16} style={{ color: '#22C55E', animation: 'spin 1s linear infinite' }} />
           ) : (
             <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#22C55E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle size={14} style={{ color: '#0F172A' }} />
+              <CheckCircle size={14} style={{ color: 'var(--bg-canvas)' }} />
             </div>
           )}
           <span style={{ fontSize: 14, color: '#22C55E', fontWeight: 500 }}>
@@ -179,7 +179,7 @@ export default function ConnectorPanel() {
             alignItems: 'center',
             gap: 6,
             fontSize: 13,
-            color: '#64748B',
+            color: 'var(--text-secondary)',
             background: 'none',
             border: 'none',
             cursor: 'pointer',
@@ -214,8 +214,8 @@ export default function ConnectorPanel() {
               style={{
                 padding: '16px',
                 borderRadius: 10,
-                background: '#11151C',
-                border: '1px solid #1E293B',
+                background: 'var(--bg-panel)',
+                border: '1px solid var(--border-base)',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 display: 'flex',
@@ -223,12 +223,12 @@ export default function ConnectorPanel() {
                 minHeight: 140,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#334155'
+                e.currentTarget.style.borderColor = 'var(--border-bright)'
                 e.currentTarget.style.transform = 'translateY(-2px)'
                 e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#1E293B'
+                e.currentTarget.style.borderColor = 'var(--border-base)'
                 e.currentTarget.style.transform = 'translateY(0)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
@@ -237,10 +237,10 @@ export default function ConnectorPanel() {
                 <DBLogo type={key} />
               </div>
               
-              <h3 style={{ fontSize: 13, fontWeight: 700, color: '#F8FAFC', margin: '0 0 4px' }}>
+              <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', margin: '0 0 4px' }}>
                 {meta.label}
               </h3>
-              <p style={{ fontSize: 11, color: '#64748B', margin: '0 0 12px', lineHeight: 1.4, flex: 1 }}>
+              <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '0 0 12px', lineHeight: 1.4, flex: 1 }}>
                 {meta.desc}
               </p>
               
@@ -250,11 +250,11 @@ export default function ConnectorPanel() {
                     width: 6,
                     height: 6,
                     borderRadius: '50%',
-                    background: '#64748B',
+                    background: 'var(--text-tertiary)',
                     display: 'inline-block',
                   }}
                 />
-                <span style={{ fontSize: 12, color: '#64748B', fontWeight: 500 }}>Not connected</span>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)', fontWeight: 500 }}>Not connected</span>
               </div>
             </motion.div>
           )
@@ -262,11 +262,11 @@ export default function ConnectorPanel() {
       </div>
 
       {/* Info footer */}
-      <div style={{ display: 'flex', gap: 12, padding: '16px 20px', background: '#0F172A', border: '1px solid #1E293B', borderRadius: 8, marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 12, padding: '16px 20px', background: 'var(--bg-row)', border: '1px solid var(--border-base)', borderRadius: 8, marginTop: 8 }}>
         <Info size={20} style={{ color: '#38BDF8', flexShrink: 0, marginTop: 2 }} />
         <div>
-          <h4 style={{ margin: '0 0 4px', fontSize: 14, color: '#F8FAFC', fontWeight: 600 }}>How it works</h4>
-          <p style={{ margin: 0, fontSize: 13, color: '#94A3B8' }}>Select a connector to view configuration options and establish a connection to your data source.</p>
+          <h4 style={{ margin: '0 0 4px', fontSize: 14, color: 'var(--text-primary)', fontWeight: 600 }}>How it works</h4>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--text-tertiary)' }}>Select a connector to view configuration options and establish a connection to your data source.</p>
         </div>
       </div>
 
@@ -298,8 +298,8 @@ export default function ConnectorPanel() {
               style={{
                 width: '100%',
                 maxWidth: 420,
-                background: '#0F172A',
-                border: '1px solid #1E293B',
+                background: 'var(--bg-row)',
+                border: '1px solid var(--border-base)',
                 borderRadius: 12,
                 overflow: 'hidden',
               }}
@@ -312,7 +312,7 @@ export default function ConnectorPanel() {
                   justifyContent: 'space-between',
                   padding: '16px 20px',
                   borderBottom: '1px solid #1E293B',
-                  background: '#1E293B',
+                  background: 'var(--bg-panel)',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -320,10 +320,10 @@ export default function ConnectorPanel() {
                     <DBLogo type={selected} />
                   </div>
                   <div>
-                    <p style={{ fontSize: 15, fontWeight: 700, color: '#F8FAFC', margin: 0 }}>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
                       Configure {ADAPTER_META[selected]?.label || selected}
                     </p>
-                    <p style={{ fontSize: 12, color: '#94A3B8', margin: '2px 0 0' }}>
+                    <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: '2px 0 0' }}>
                       {ADAPTER_META[selected]?.desc}
                     </p>
                   </div>
@@ -333,7 +333,7 @@ export default function ConnectorPanel() {
                   style={{
                     background: 'none',
                     border: 'none',
-                    color: '#64748B',
+                    color: 'var(--text-secondary)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -343,7 +343,7 @@ export default function ConnectorPanel() {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.color = '#F8FAFC'
-                    e.currentTarget.style.background = '#334155'
+                    e.currentTarget.style.background = 'var(--bg-raised)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.color = '#64748B'
@@ -363,7 +363,7 @@ export default function ConnectorPanel() {
                         display: 'block',
                         fontSize: 12,
                         fontWeight: 600,
-                        color: '#94A3B8',
+                        color: 'var(--text-tertiary)',
                         marginBottom: 6,
                         textTransform: 'capitalize',
                       }}
@@ -378,7 +378,7 @@ export default function ConnectorPanel() {
                       value={connConfig[field] || ''}
                       onChange={(e) => setConnConfig((c) => ({ ...c, [field]: e.target.value }))}
                       className="input-cyber"
-                      style={{ fontSize: 13, background: '#0B1120', borderColor: '#1E293B' }}
+                      style={{ fontSize: 13, background: 'var(--bg-canvas)', borderColor: 'var(--border-base)' }}
                     />
                   </div>
                 ))}

@@ -80,7 +80,7 @@ export default function ToolsStudio() {
   }
 
   return (
-    <div style={{ padding: '24px 32px', color: '#E8EDF5', minHeight: '100vh', background: '#06080C', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div style={{ padding: '24px 32px', color: 'var(--text-primary)', minHeight: '100vh', background: 'var(--bg-canvas)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       
       {/* ── Executive Header Bar ────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: 18 }}>
@@ -90,10 +90,10 @@ export default function ToolsStudio() {
               <Cpu size={20} style={{ color: '#00C8F0' }} />
             </div>
             <div>
-              <h1 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 800, letterSpacing: '0.08em', color: '#FFFFFF', margin: 0 }}>
+              <h1 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 20, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--text-primary)', margin: 0 }}>
                 TACTICAL INTELLIGENCE OPERATIONS SUITE
               </h1>
-              <p style={{ fontSize: 12, color: '#94A3B8', margin: '2px 0 0' }}>
+              <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '2px 0 0' }}>
                 Pre-loaded operational tools with operational use cases, multi-database reasoning, and live visual widgets.
               </p>
             </div>
@@ -101,10 +101,10 @@ export default function ToolsStudio() {
         </div>
 
         {/* Global Parameter Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'rgba(10, 14, 22, 0.92)', border: '1px solid rgba(0, 200, 240, 0.25)', borderRadius: 10, padding: '8px 16px', boxShadow: '0 0 20px rgba(0, 200, 240, 0.15)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'var(--bg-panel)', border: '1px solid rgba(0, 200, 240, 0.25)', borderRadius: 10, padding: '8px 16px', boxShadow: '0 0 20px rgba(0, 200, 240, 0.15)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#A855F7', fontWeight: 800 }}>SUSPECT ID:</span>
-            <input type="text" value={accusedId} onChange={(e) => setAccusedId(e.target.value)} style={{ width: 80, background: '#06080C', border: '1px solid rgba(168, 85, 247, 0.4)', borderRadius: 4, color: '#FFF', fontSize: 11, textAlign: 'center', padding: '3px 4px', fontWeight: 700 }} />
+            <input type="text" value={accusedId} onChange={(e) => setAccusedId(e.target.value)} style={{ width: 80, background: 'var(--bg-canvas)', border: '1px solid rgba(168, 85, 247, 0.4)', borderRadius: 4, color: 'var(--text-primary)', fontSize: 11, textAlign: 'center', padding: '3px 4px', fontWeight: 700 }} />
           </div>
         </div>
       </div>
@@ -115,12 +115,12 @@ export default function ToolsStudio() {
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 24 }}>
         
         {/* Left Column: Feature Selection Cards with "Why & How Used" Guides */}
-        <div style={{ background: 'rgba(10, 14, 22, 0.92)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 14, padding: 22 }}>
+        <div style={{ background: 'var(--bg-panel)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 14, padding: 22 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: 12 }}>
             <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 800, color: '#00C8F0', margin: 0, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Layers size={16} /> {SUITE_CATEGORIES.find(c => c.id === activeCategory)?.label} TOOLS
             </h2>
-            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#64748B' }}>SELECT MODULE TO INSPECT</span>
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: 'var(--text-tertiary)' }}>SELECT MODULE TO INSPECT</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxHeight: 650, overflowY: 'auto', paddingRight: 4 }}>
@@ -131,8 +131,8 @@ export default function ToolsStudio() {
                   key={feat.name}
                   onClick={() => setSelectedFeature(feat)}
                   style={{
-                    background: isSelected ? 'rgba(0, 200, 240, 0.12)' : 'rgba(6, 8, 12, 0.85)',
-                    border: `1px solid ${isSelected ? '#00C8F0' : 'rgba(255, 255, 255, 0.08)'}`,
+                    background: isSelected ? 'rgba(0, 200, 240, 0.12)' : 'var(--bg-row)',
+                    border: `1px solid ${isSelected ? '#00C8F0' : 'var(--border-dim)'}`,
                     borderRadius: 10, padding: '16px 18px', cursor: 'pointer', transition: 'all 0.22s ease',
                     boxShadow: isSelected ? '0 0 22px rgba(0, 200, 240, 0.18)' : 'none'
                   }}
@@ -140,7 +140,7 @@ export default function ToolsStudio() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <div style={{ width: 8, height: 8, borderRadius: '50%', background: isSelected ? '#00C8F0' : '#8B5CF6', boxShadow: `0 0 10px ${isSelected ? '#00C8F0' : '#8B5CF6'}` }} />
-                      <span style={{ fontSize: 14, fontWeight: 700, color: '#FFFFFF' }}>{feat.name}</span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{feat.name}</span>
                     </div>
 
                     <a
@@ -154,19 +154,19 @@ export default function ToolsStudio() {
                     </a>
                   </div>
 
-                  <p style={{ fontSize: 12, color: '#94A3B8', margin: '4px 0 10px', lineHeight: 1.45 }}>{feat.description}</p>
+                  <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 10px', lineHeight: 1.45 }}>{feat.description}</p>
 
                   {/* Operational "Why & How Used" Guide */}
-                  <div style={{ background: '#06080C', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: 8, padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                       <Target size={12} style={{ color: '#00C8F0', flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontSize: 11, color: '#CBD5E1' }}>
+                      <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                         <strong style={{ color: '#00C8F0' }}>Operational Purpose:</strong> {feat.whyUsed}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                       <Cpu size={12} style={{ color: '#A855F7', flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontSize: 11, color: '#CBD5E1' }}>
+                      <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                         <strong style={{ color: '#A855F7' }}>Under-The-Hood:</strong> {feat.howItWorks}
                       </span>
                     </div>
@@ -179,7 +179,7 @@ export default function ToolsStudio() {
         </div>
 
         {/* Right Column: Pre-Loaded Interactive Visual Dashboard */}
-        <div style={{ background: 'rgba(10, 14, 22, 0.92)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 14, padding: 22, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ background: 'var(--bg-panel)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 14, padding: 22, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, borderBottom: '1px solid rgba(255, 255, 255, 0.08)', paddingBottom: 12 }}>
             <h2 style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 800, color: '#8B5CF6', margin: 0, textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Gauge size={16} /> PRE-LOADED INTELLIGENCE DASHBOARD
@@ -193,14 +193,14 @@ export default function ToolsStudio() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
               
               {/* Selected Feature Header */}
-              <div style={{ background: 'rgba(6, 8, 12, 0.95)', border: '1px solid rgba(0, 200, 240, 0.35)', borderRadius: 10, padding: '16px 18px', boxShadow: '0 0 20px rgba(0, 200, 240, 0.15)' }}>
+              <div style={{ background: 'var(--bg-panel)', border: '1px solid rgba(0, 200, 240, 0.35)', borderRadius: 10, padding: '16px 18px', boxShadow: '0 0 20px rgba(0, 200, 240, 0.15)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: '#FFFFFF' }}>{selectedFeature.name}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 800, color: '#00C8F0', background: 'rgba(0, 200, 240, 0.15)', padding: '4px 10px', borderRadius: 12, border: '1px solid rgba(0, 200, 240, 0.3)' }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)' }}>{selectedFeature.name}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 800, color: '#00C8F0', background: 'var(--bg-raised)', padding: '4px 10px', borderRadius: 12, border: '1px solid rgba(0, 200, 240, 0.3)' }}>
                     {isLoading ? 'FETCHING DATA...' : 'MODULE READY'}
                   </span>
                 </div>
-                <p style={{ fontSize: 12, color: '#94A3B8', margin: 0, lineHeight: 1.45 }}>{selectedFeature.description}</p>
+                <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.45 }}>{selectedFeature.description}</p>
               </div>
 
               {isLoading ? (
@@ -209,8 +209,8 @@ export default function ToolsStudio() {
                   <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>Executing Intelligence Query...</div>
                 </div>
               ) : liveData ? (
-                <div style={{ background: '#06080C', border: '1px solid rgba(0, 200, 240, 0.3)', borderRadius: 10, padding: 16, overflowX: 'auto', flex: 1 }}>
-                  <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(0, 200, 240, 0.3)', borderRadius: 10, padding: 16, overflowX: 'auto', flex: 1 }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
                     <Database size={12} style={{ color: '#00C8F0' }} /> INTELLIGENCE RESULTS
                   </div>
                   <DynamicDataViewer data={liveData} />
@@ -222,7 +222,7 @@ export default function ToolsStudio() {
                       <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
                       <div>
                         <strong>Connection Error:</strong> {error}
-                        <div style={{ marginTop: 4, color: '#94A3B8' }}>Backend may not be running. Displaying static preview instead.</div>
+                        <div style={{ marginTop: 4, color: 'var(--text-secondary)' }}>Backend may not be running. Displaying static preview instead.</div>
                       </div>
                     </div>
                   )}
@@ -234,8 +234,8 @@ export default function ToolsStudio() {
             </div>
           ) : (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 40, textAlign: 'center' }}>
-              <Sparkles size={38} style={{ color: '#334155', marginBottom: 14 }} />
-              <p style={{ fontSize: 13, color: '#94A3B8', margin: 0 }}>Select a tool module from the left panel to inspect its visual intelligence content.</p>
+              <Sparkles size={38} style={{ color: 'var(--text-tertiary)', marginBottom: 14 }} />
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>Select a tool module from the left panel to inspect its visual intelligence content.</p>
             </div>
           )}
         </div>
@@ -247,18 +247,18 @@ export default function ToolsStudio() {
 
 // ─── Dynamic Data Viewer ───────────────────────────────────────────────────────
 function DynamicDataViewer({ data }) {
-  if (data === null || data === undefined) return <span style={{ color: '#64748B' }}>N/A</span>;
+  if (data === null || data === undefined) return <span style={{ color: 'var(--text-tertiary)' }}>N/A</span>;
   
   if (typeof data === 'string' || typeof data === 'number' || typeof data === 'boolean') {
-    return <span style={{ color: '#E2E8F0', fontWeight: 600 }}>{String(data)}</span>;
+    return <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{String(data)}</span>;
   }
 
   if (Array.isArray(data)) {
-    if (data.length === 0) return <span style={{ color: '#64748B' }}>No results</span>;
+    if (data.length === 0) return <span style={{ color: 'var(--text-tertiary)' }}>No results</span>;
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {data.map((item, i) => (
-          <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: 14 }}>
+          <div key={i} style={{ background: 'var(--bg-raised)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: 14 }}>
             <DynamicDataViewer data={item} />
           </div>
         ))}
@@ -273,12 +273,12 @@ function DynamicDataViewer({ data }) {
           <tbody>
             {Object.entries(data).map(([k, v], i) => (
               <tr key={k} style={{ borderBottom: i !== Object.keys(data).length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
-                <td style={{ padding: '10px 14px', width: '35%', verticalAlign: 'top', background: 'rgba(255,255,255,0.03)', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
+                <td style={{ padding: '10px 14px', width: '35%', verticalAlign: 'top', background: 'var(--bg-raised)', borderRight: '1px solid rgba(255,255,255,0.08)' }}>
                   <span style={{ fontSize: 10, color: '#00C8F0', textTransform: 'uppercase', fontWeight: 800, letterSpacing: '0.05em', fontFamily: 'JetBrains Mono, monospace' }}>
                     {k.replace(/_/g, ' ')}
                   </span>
                 </td>
-                <td style={{ padding: '10px 14px', color: '#F8FAFC', background: 'rgba(6, 8, 12, 0.4)' }}>
+                <td style={{ padding: '10px 14px', color: 'var(--text-primary)', background: 'var(--bg-row)' }}>
                   <DynamicDataViewer data={v} />
                 </td>
               </tr>
@@ -298,36 +298,36 @@ function PreLoadedVisualWidget({ category, feature, firId, accusedId, accountNum
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
-          <div style={{ background: '#06080C', border: '1px solid rgba(0, 200, 240, 0.3)', padding: 12, borderRadius: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>CASE CLEARANCE SCORE</div>
+          <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(0, 200, 240, 0.3)', padding: 12, borderRadius: 8, textAlign: 'center' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>CASE CLEARANCE SCORE</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#00C8F0', marginTop: 4 }}>94.2%</div>
           </div>
-          <div style={{ background: '#06080C', border: '1px solid rgba(139, 92, 246, 0.3)', padding: 12, borderRadius: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>EVIDENCE GAPS</div>
+          <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(139, 92, 246, 0.3)', padding: 12, borderRadius: 8, textAlign: 'center' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>EVIDENCE GAPS</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#C084FC', marginTop: 4 }}>2 DETECTED</div>
           </div>
-          <div style={{ background: '#06080C', border: '1px solid rgba(16, 185, 129, 0.3)', padding: 12, borderRadius: 8, textAlign: 'center' }}>
-            <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>CONFIDENCE INDEX</div>
+          <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: 12, borderRadius: 8, textAlign: 'center' }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>CONFIDENCE INDEX</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: '#10B981', marginTop: 4 }}>HIGH (0.96)</div>
           </div>
         </div>
 
         {/* Digital Case Ingestion & Evidence Checklist */}
-        <div style={{ background: '#06080C', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 10, padding: 14 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#E2E8F0', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: 10, padding: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
             <FileText size={14} style={{ color: '#00C8F0' }} /> FIR-{firId} DIGITAL CASE FILE SUMMARY
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, fontSize: 12 }}>
-              <span style={{ color: '#CBD5E1' }}>FIR Offense Classification</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-raised)', borderRadius: 6, fontSize: 12 }}>
+              <span style={{ color: 'var(--text-secondary)' }}>FIR Offense Classification</span>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#00C8F0', fontWeight: 700 }}>IPC 420 / CYBER FRAUD</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, fontSize: 12 }}>
-              <span style={{ color: '#CBD5E1' }}>ALPR Vehicle License Match</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-raised)', borderRadius: 6, fontSize: 12 }}>
+              <span style={{ color: 'var(--text-secondary)' }}>ALPR Vehicle License Match</span>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#10B981', fontWeight: 700 }}>KA-01-MJ-4492 (VERIFIED)</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, fontSize: 12 }}>
-              <span style={{ color: '#CBD5E1' }}>CDR Phone Tower Intersection</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-raised)', borderRadius: 6, fontSize: 12 }}>
+              <span style={{ color: 'var(--text-secondary)' }}>CDR Phone Tower Intersection</span>
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#A855F7', fontWeight: 700 }}>3 NUMBERS MATCHED</span>
             </div>
           </div>
@@ -339,23 +339,23 @@ function PreLoadedVisualWidget({ category, feature, firId, accusedId, accountNum
   if (category === 'profiling') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ background: '#06080C', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: 10, padding: 16 }}>
+        <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: 10, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span style={{ fontSize: 12, fontWeight: 800, color: '#EF4444' }}>SUSPECT THREAT & DANGER SCORE (ID #{accusedId})</span>
             <span style={{ fontSize: 16, fontWeight: 800, color: '#EF4444' }}>88 / 100 (HIGH RISK)</span>
           </div>
-          <div style={{ width: '100%', height: 10, background: 'rgba(255,255,255,0.1)', borderRadius: 5, overflow: 'hidden' }}>
+          <div style={{ width: '100%', height: 10, background: 'var(--border-base)', borderRadius: 5, overflow: 'hidden' }}>
             <div style={{ width: '88%', height: '100%', background: 'linear-gradient(90deg, #F59E0B, #EF4444)' }} />
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <div style={{ background: '#06080C', border: '1px solid rgba(255,255,255,0.08)', padding: 14, borderRadius: 8 }}>
-            <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>RECIDIVISM PROBABILITY</div>
+          <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(255,255,255,0.08)', padding: 14, borderRadius: 8 }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>RECIDIVISM PROBABILITY</div>
             <div style={{ fontSize: 20, fontWeight: 800, color: '#F59E0B', marginTop: 4 }}>76.4% IN 12 MONTHS</div>
           </div>
-          <div style={{ background: '#06080C', border: '1px solid rgba(255,255,255,0.08)', padding: 14, borderRadius: 8 }}>
-            <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>BEHAVIORAL CLUSTER</div>
+          <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(255,255,255,0.08)', padding: 14, borderRadius: 8 }}>
+            <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>BEHAVIORAL CLUSTER</div>
             <div style={{ fontSize: 13, fontWeight: 700, color: '#38BDF8', marginTop: 6 }}>SERIAL ARMED PROPERTY</div>
           </div>
         </div>
@@ -366,17 +366,17 @@ function PreLoadedVisualWidget({ category, feature, firId, accusedId, accountNum
   if (category === 'finance') {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ background: '#06080C', border: '1px solid rgba(16, 185, 129, 0.35)', borderRadius: 10, padding: 16 }}>
+        <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(16, 185, 129, 0.35)', borderRadius: 10, padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: '#10B981' }}>SUSPICIOUS HAWALA & AML STREAM (ACC #{accountNumber})</span>
-            <span style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>CROSS-BORDER DETECTED</span>
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>CROSS-BORDER DETECTED</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(16,185,129,0.08)', borderRadius: 6, fontSize: 12 }}>
               <span>TXN-99824 // ₹45,00,000 Transfer</span>
               <span style={{ color: '#EF4444', fontWeight: 700 }}>FLAGGED STRUCTURING</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, fontSize: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-raised)', borderRadius: 6, fontSize: 12 }}>
               <span>TXN-99825 // Offshore Shell Account Wire</span>
               <span style={{ color: '#F59E0B', fontWeight: 700 }}>HIGH VELOCITY</span>
             </div>
@@ -389,12 +389,12 @@ function PreLoadedVisualWidget({ category, feature, firId, accusedId, accountNum
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <div style={{ background: '#06080C', border: '1px solid rgba(0, 200, 240, 0.35)', padding: 16, borderRadius: 10, textAlign: 'center' }}>
-          <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>MODULE SCORE INDEX</div>
+        <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(0, 200, 240, 0.35)', padding: 16, borderRadius: 10, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>MODULE SCORE INDEX</div>
           <div style={{ fontSize: 26, fontWeight: 800, color: '#00C8F0', marginTop: 4 }}>92 / 100</div>
         </div>
-        <div style={{ background: '#06080C', border: '1px solid rgba(139, 92, 246, 0.35)', padding: 16, borderRadius: 10, textAlign: 'center' }}>
-          <div style={{ fontSize: 10, color: '#64748B', fontFamily: 'JetBrains Mono, monospace' }}>SYSTEM STATUS</div>
+        <div style={{ background: 'var(--bg-canvas)', border: '1px solid rgba(139, 92, 246, 0.35)', padding: 16, borderRadius: 10, textAlign: 'center' }}>
+          <div style={{ fontSize: 10, color: 'var(--text-tertiary)', fontFamily: 'JetBrains Mono, monospace' }}>SYSTEM STATUS</div>
           <div style={{ fontSize: 15, fontWeight: 800, color: '#10B981', marginTop: 8 }}>OPERATIONAL READY</div>
         </div>
       </div>
