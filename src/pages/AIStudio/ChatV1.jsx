@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Send, Bot, Trash2, Loader2 } from 'lucide-react'
 import useChatStore from '../../store/useChatStore'
 import VigilXFormattedResponse from '../../components/chat/VigilXFormattedResponse'
+import FormattedAIResponse from '../../components/FormattedAIResponse'
 
 const STARTERS = [
   'Who are the top suspects in the narcotics case?',

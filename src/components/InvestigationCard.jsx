@@ -1,4 +1,4 @@
-import React from 'react'
+﻿import React from 'react'
 import InvestigationHeader from './investigation/InvestigationHeader'
 import InvestigationOverview from './investigation/InvestigationOverview'
 import QueryInterpretationCard from './investigation/QueryInterpretationCard'
