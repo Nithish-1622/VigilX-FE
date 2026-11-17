@@ -243,7 +243,7 @@ export default function ChatV2() {
             {m.role === 'user'
               ? <div className="chat-bubble-user">{m.text}</div>
               : m.data
-                ? <InvestigationCard data={m.data} />
+                ? <InvestigationCard data={m.data} onSelectPrompt={(p) => sendV2Message(p)} />
                 : <div className="chat-bubble-ai" style={{ width: '100%', maxWidth: 720 }}><FormattedAIResponse content={m.text} /></div>
             }
           </motion.div>

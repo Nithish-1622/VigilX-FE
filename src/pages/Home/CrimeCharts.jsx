@@ -215,21 +215,21 @@ export default function CrimeCharts() {
         </div>
 
         {/* Content */}
-        <div style={{ display: 'flex', height: 520 }}>
+        <div style={{ display: 'flex', height: 520, minWidth: 0 }}>
           {/* Left Panel: Donut & Legend */}
-          <div style={{ width: 280, flexShrink: 0, padding: 24, paddingRight: 40, borderRight: 'none', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ width: 230, flexShrink: 0, padding: '20px 16px', borderRight: 'none', display: 'flex', flexDirection: 'column' }}>
             <div style={{ height: 180, position: 'relative', marginBottom: 24 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={INCIDENT_BREAKDOWN} cx="50%" cy="50%" innerRadius={65} outerRadius={85} paddingAngle={4} stroke="none" dataKey="value">
+                  <Pie data={INCIDENT_BREAKDOWN} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={4} stroke="none" dataKey="value">
                     {INCIDENT_BREAKDOWN.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>128</div>
-                <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginTop: 4 }}>Total Incidents</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#22C55E', fontSize: 11, fontWeight: 600, marginTop: 8 }}>
+                <div style={{ fontSize: 32, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1 }}>128</div>
+                <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 4 }}>Total Incidents</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#22C55E', fontSize: 11, fontWeight: 600, marginTop: 6 }}>
                   <ArrowUp size={12} strokeWidth={3} />
                   <span>14.6%</span>
                 </div>
@@ -238,16 +238,16 @@ export default function CrimeCharts() {
             </div>
 
             {/* Legend List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {INCIDENT_BREAKDOWN.map(item => (
                 <div key={item.name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color }} />
-                    <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{item.name}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{item.name}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', width: 24, textAlign: 'right' }}>{item.value}</span>
-                    <span style={{ fontSize: 13, color: 'var(--text-tertiary)', width: 40, textAlign: 'right', fontFamily: 'var(--mono)' }}>{item.percentage}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', textAlign: 'right' }}>{item.value}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-tertiary)', textAlign: 'right', fontFamily: 'var(--mono)' }}>{item.percentage}</span>
                   </div>
                 </div>
               ))}
@@ -255,30 +255,30 @@ export default function CrimeCharts() {
           </div>
 
           {/* Right Panel: Summary Cards + Area Chart */}
-          <div style={{ flex: 1, padding: 24, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, minWidth: 0, padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
             {/* Summary Cards */}
-            <div style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 10, marginBottom: 20 }}>
               {[
                 { label: 'PEAK DAY', value: 'Saturday', sub: '32 incidents', icon: Activity, color: '#06B6D4' },
                 { label: 'HIGHEST TYPE', value: 'Narcotics', sub: '27 incidents', icon: Crosshair, color: '#F43F5E' },
                 { label: 'PEAK HOUR', value: '18:00 - 20:00', sub: 'Most active', icon: Clock, color: '#F59E0B' },
                 { label: 'TREND', value: 'Increasing', sub: 'since Thursday', icon: BarChart2, color: '#A855F7' },
               ].map(card => (
-                <div key={card.label} style={{ flex: 1, background: 'var(--bg-row)', border: 'none', borderRadius: 8, padding: '16px', display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 8, background: `rgba(${parseInt(card.color.slice(1, 3), 16)}, ${parseInt(card.color.slice(3, 5), 16)}, ${parseInt(card.color.slice(5, 7), 16)}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <card.icon size={20} color={card.color} />
+                <div key={card.label} style={{ minWidth: 0, background: 'var(--bg-row)', border: 'none', borderRadius: 8, padding: '12px 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 34, height: 34, flexShrink: 0, borderRadius: 8, background: `rgba(${parseInt(card.color.slice(1, 3), 16)}, ${parseInt(card.color.slice(3, 5), 16)}, ${parseInt(card.color.slice(5, 7), 16)}, 0.1)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <card.icon size={16} color={card.color} />
                   </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: card.color, fontWeight: 600, letterSpacing: '0.05em', marginBottom: 2 }}>{card.label}</div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{card.value}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>{card.sub}</div>
+                  <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                    <div style={{ fontSize: 9, color: card.color, fontWeight: 600, letterSpacing: '0.04em', marginBottom: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{card.label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{card.value}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 1, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{card.sub}</div>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Split Charts Container */}
-            <div style={{ display: 'flex', gap: 24, flex: 1, minHeight: 0 }}>
+            <div style={{ display: 'flex', gap: 16, flex: 1, minHeight: 0, minWidth: 0 }}>
 
               {/* Left Column: Bar Chart */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -362,11 +362,11 @@ export default function CrimeCharts() {
         </div>
 
         {/* Content */}
-        <div style={{ display: 'flex', height: 360 }}>
+        <div style={{ display: 'flex', height: 360, minWidth: 0 }}>
           {/* Left Panel: Gauge & Stats */}
-          <div style={{ width: 380, flexShrink: 0, padding: 24, paddingRight: 40, borderRight: 'none', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ width: 300, flexShrink: 0, padding: '20px 16px', borderRight: 'none', display: 'flex', flexDirection: 'column' }}>
 
-            <div style={{ display: 'flex', gap: 24, flex: 1 }}>
+            <div style={{ display: 'flex', gap: 16, flex: 1 }}>
               {/* Gauge */}
               <div style={{ width: 160, position: 'relative' }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -430,7 +430,7 @@ export default function CrimeCharts() {
           </div>
 
           {/* Right Panel: Lollipop Chart */}
-          <div style={{ flex: 1, padding: '24px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, minWidth: 0, padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
             {/* Chart Legend */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>
